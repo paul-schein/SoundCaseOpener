@@ -1,6 +1,7 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using SoundCaseOpener.Persistence.Repositories;
 
 namespace SoundCaseOpener.Persistence.Util;
 
@@ -13,6 +14,8 @@ public interface ITransactionProvider : IAsyncDisposable, IDisposable
 
 public interface IUnitOfWork
 {
+    public IUserRepository UserRepository { get; }
+    
     public Task SaveChangesAsync();
 }
 
@@ -21,6 +24,8 @@ internal sealed class UnitOfWork(DatabaseContext context, ILogger<UnitOfWork> lo
 {
     private IDbContextTransaction? _transaction;
 
+    public IUserRepository UserRepository { get; } = new UserRepository(context.Users);
+    
     public async ValueTask BeginTransactionAsync()
     {
         if (_transaction is not null)

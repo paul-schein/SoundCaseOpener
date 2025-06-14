@@ -7,6 +7,7 @@ public interface IUserRepository
 {
     public ValueTask<User?> GetUserByUserNameAsync(string username);
     public ValueTask<User?> GetUserByIdAsync(int id, bool tracking = false);
+    public ValueTask<bool> CheckUserExistsAsync(string username);
     public void AddUser(User user);
 }
 
@@ -24,6 +25,9 @@ internal sealed class UserRepository(DbSet<User> users) : IUserRepository
         return await GetQueryableByTracking(tracking)
             .FirstOrDefaultAsync(u => u.Id == id);
     }
+
+    public async ValueTask<bool> CheckUserExistsAsync(string username) => 
+        await UsersNoTracking.AnyAsync(u => u.Username == username);
 
     public void AddUser(User user)
     {
