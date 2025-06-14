@@ -58,6 +58,12 @@ entity Case {
 
 }
 
+entity SoundEffect {
+    Id: int <<PK>>
+    Name: string
+    FilePath: string
+}
+
 Item <|-- Sound
 Item <|-- Case
 
@@ -69,6 +75,8 @@ ItemTemplate <|-- CaseTemplate
 
 CaseTemplate "1" -- "n" CaseItem
 CaseItem "n" -- "1" ItemTemplate
+
+SoundTemplate "n" -- "1" SoundEffect
 
 User "1" -- "n" Item
 User *-- Role
