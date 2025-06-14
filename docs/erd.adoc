@@ -1,0 +1,77 @@
+[plantuml]
+----
+@startuml
+hide empty methods
+hide empty fields
+
+entity User {
+    Id: int <<PK>>
+    Username: string
+    Role: Role
+}
+
+enum Role {
+    Admin
+    User
+}
+
+enum Rarity {
+    Common
+    Uncommon
+    Rare
+    Epic
+    Legendary
+}
+
+entity ItemTemplate {
+    Id: int <<PK>>
+    Name: string
+    Description: string
+    Rarity: Rarity
+}
+
+entity CaseTemplate {}
+
+entity SoundTemplate {
+    CooldownMin: int
+    CooldownMax: int
+}
+
+entity CaseItem {
+    CaseTemplateId: int <<PK>>
+    ItemTemplateId: int <<PK>>
+    Chance: float
+}
+
+entity Item {
+    Id: int <<PK>>
+    Name: string
+    ItemTemplateId: int <<FK>>
+    OwnerId: int <<FK>>
+}
+
+entity Sound {
+    Cooldown
+}
+
+entity Case {
+
+}
+
+Item <|-- Sound
+Item <|-- Case
+
+ItemTemplate "1" -l- "n" Item
+ItemTemplate *-u- Rarity
+
+ItemTemplate <|-r- SoundTemplate
+ItemTemplate <|-- CaseTemplate
+
+CaseTemplate "1" -- "n" CaseItem
+CaseItem "n" -- "1" ItemTemplate
+
+User "1" -- "n" Item
+User *-- Role
+
+@enduml
+----
