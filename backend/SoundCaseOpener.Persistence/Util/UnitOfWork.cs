@@ -1,5 +1,4 @@
 using System.Data;
-using SoundCaseOpener.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -14,7 +13,6 @@ public interface ITransactionProvider : IAsyncDisposable, IDisposable
 
 public interface IUnitOfWork
 {
-    public IRocketRepository RocketRepository { get; }
     public Task SaveChangesAsync();
 }
 
@@ -22,8 +20,6 @@ internal sealed class UnitOfWork(DatabaseContext context, ILogger<UnitOfWork> lo
     : IUnitOfWork, ITransactionProvider
 {
     private IDbContextTransaction? _transaction;
-    
-    public IRocketRepository RocketRepository => new RocketRepository(context.Rockets);
 
     public async ValueTask BeginTransactionAsync()
     {

@@ -10,4 +10,9 @@
         <PackageReference Include="OneOf" Version="3.0.271"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Logic\" />
+      <Folder Include="Services\" />
+    </ItemGroup>
+
 </Project>
