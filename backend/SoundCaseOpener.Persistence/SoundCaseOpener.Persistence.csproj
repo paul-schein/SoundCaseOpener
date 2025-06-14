@@ -13,4 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SoundCaseOpener.Shared\SoundCaseOpener.Shared.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Repositories\" />
+  </ItemGroup>
 </Project>

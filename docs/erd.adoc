@@ -5,8 +5,7 @@ hide empty methods
 hide empty fields
 
 entity User {
-    Id: int <<PK>>
-    Username: string
+    Username: string <<PK>>
     Role: Role
 }
 
@@ -33,8 +32,9 @@ entity ItemTemplate {
 entity CaseTemplate {}
 
 entity SoundTemplate {
-    CooldownMin: int
-    CooldownMax: int
+    MinCooldown: int
+    MaxCooldown: int
+    SoundFileId: int <<FK>>
 }
 
 entity CaseItem {
@@ -58,7 +58,7 @@ entity Case {
 
 }
 
-entity SoundEffect {
+entity SoundFile {
     Id: int <<PK>>
     Name: string
     FilePath: string
@@ -76,7 +76,7 @@ ItemTemplate <|-- CaseTemplate
 CaseTemplate "1" -- "n" CaseItem
 CaseItem "n" -- "1" ItemTemplate
 
-SoundTemplate "n" -- "1" SoundEffect
+SoundTemplate "n" -- "1" SoundFile
 
 User "1" -- "n" Item
 User *-- Role
