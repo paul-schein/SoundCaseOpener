@@ -1,6 +1,6 @@
 ﻿namespace SoundCaseOpener.Persistence.Model;
 
-public class CaseTemplate
+public class CaseTemplate : ItemTemplate
 {
     public required List<CaseItem> ItemTemplates { get; set; }
 }

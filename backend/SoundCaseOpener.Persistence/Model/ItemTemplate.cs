@@ -7,5 +7,5 @@ public class ItemTemplate
     public required string Description { get; set; }
     public required Rarity Rarity { get; set; }
     public required List<Item> Items { get; set; }
-    public required List<CaseTemplate> CaseTemplates { get; set; }
+    public required List<CaseItem> CaseTemplates { get; set; }
 }

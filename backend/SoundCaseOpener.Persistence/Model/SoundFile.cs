@@ -5,4 +5,5 @@ public class SoundFile
     public int Id { get; set; }
     public required string Name { get; set; }
     public required string FilePath { get; set; }
+    public required List<SoundTemplate> SoundTemplates { get; set; }
 }
