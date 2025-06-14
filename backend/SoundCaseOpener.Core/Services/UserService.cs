@@ -11,6 +11,7 @@ public interface IUserService
     public ValueTask<OneOf<User, NotFound>> GetUserByUsername(string username);
     public ValueTask<OneOf<User, NotFound>> GetUserById(int id);
     public ValueTask<OneOf<Success<User>, Conflict>> AddUser(string username);
+    public ValueTask<OneOf<Role, NotFound>> GetUserRoleById(int id);
 
     public readonly record struct Conflict;
 }
@@ -58,8 +59,21 @@ internal sealed class UserService(IUnitOfWork uow,
         };
         
         uow.UserRepository.AddUser(user);
+        await uow.SaveChangesAsync();
         logger.LogInformation("User with username {Username} added", username);
         
         return new Success<User>(user);
+    }
+
+    public async ValueTask<OneOf<Role, NotFound>> GetUserRoleById(int id)
+    {
+        Role? role = await uow.UserRepository.GetUserRoleByIdAsync(id);
+        if (role is null)
+        {
+            logger.LogWarning("Role for user with id {Id} not found", id);
+            return new NotFound();
+        }
+
+        return role.Value;
     }
 }

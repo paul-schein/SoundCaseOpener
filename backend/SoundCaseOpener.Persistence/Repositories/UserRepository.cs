@@ -8,6 +8,7 @@ public interface IUserRepository
     public ValueTask<User?> GetUserByUserNameAsync(string username);
     public ValueTask<User?> GetUserByIdAsync(int id, bool tracking = false);
     public ValueTask<bool> CheckUserExistsAsync(string username);
+    public ValueTask<Role?> GetUserRoleByIdAsync(int id);
     public void AddUser(User user);
 }
 
@@ -28,6 +29,12 @@ internal sealed class UserRepository(DbSet<User> users) : IUserRepository
 
     public async ValueTask<bool> CheckUserExistsAsync(string username) => 
         await UsersNoTracking.AnyAsync(u => u.Username == username);
+
+    public async ValueTask<Role?> GetUserRoleByIdAsync(int id) => 
+        await UsersNoTracking
+              .Where(u => u.Id == id)
+              .Select(u => u.Role)
+              .FirstOrDefaultAsync();
 
     public void AddUser(User user)
     {
