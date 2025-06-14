@@ -1,0 +1,119 @@
+services:
+  # startup/init container applies migrations to the database
+  migrations:
+    container_name: sound-case-opener-migrations
+    image: paulschein/sound-case-opener:migrations-latest
+    restart: "no"
+    volumes:
+      # migrations also need the correct connection string
+      - ./backend-config.json:/app/appsettings.json:ro
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - sound_case_opener_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "1"
+
+  ingress:
+    container_name: sound-case-opener-ingress
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "5100:5100"
+      - "5101:5101"
+      - "5102:5102"
+      # prod port
+      #- "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - sound_case_opener-sounds:/srv/sounds:ro
+    networks:
+      - sound_case_opener_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "7"
+    depends_on:
+      frontend:
+        condition: service_started
+      backend:
+        condition: service_started
+
+  database:
+    container_name: sound-case-opener-database
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - sound_case_opener-db_data:/var/lib/postgresql/data
+    networks:
+      - sound_case_opener_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "4"
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 2s
+      timeout: 4s
+      retries: 10
+
+  backend:
+    container_name: sound-case-opener-backend
+    image: paulschein/sound-case-opener:backend-latest
+    restart: unless-stopped
+    environment:
+      - DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+    volumes:
+      - ./backend-config.json:/app/appsettings.json:ro
+      - sound_case_opener-sounds:/app/sounds:rw
+    networks:
+      - sound_case_opener_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    depends_on:
+      database:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+
+  frontend:
+    container_name: sound-case-opener-frontend
+    image: paulschein/sound-case-opener:frontend-latest
+    restart: unless-stopped
+    expose:
+      - "80"
+    volumes:
+      - ./frontend-config.json:/var/www/html/app-config.json:ro
+    networks:
+      - sound_case_opener_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+    depends_on:
+      backend:
+        condition: service_started
+
+networks:
+  sound_case_opener_net:
+    driver: bridge
+
+volumes:
+  sound_case_opener-db_data:
+    external: true
+  sound_case_opener-sounds:
+    external: true

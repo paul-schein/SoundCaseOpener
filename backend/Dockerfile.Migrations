@@ -1,0 +1,22 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
+ARG BUILD_CONFIGURATION=Release
+ARG FRAMEWORK=net9.0
+WORKDIR /src
+COPY ["SoundCaseOpener/SoundCaseOpener.csproj", "SoundCaseOpener/"]
+COPY ["SoundCaseOpener.Core/SoundCaseOpener.Core.csproj", "SoundCaseOpener.Core/"]
+COPY ["SoundCaseOpener.Persistence/SoundCaseOpener.Persistence.csproj", "SoundCaseOpener.Persistence/"]
+COPY ["SoundCaseOpener.Shared/SoundCaseOpener.Shared.csproj", "SoundCaseOpener.Shared/"]
+
+ENV PATH=$PATH:/root/.dotnet/tools
+RUN dotnet restore "SoundCaseOpener/SoundCaseOpener.csproj" -p:TargetFramework=$FRAMEWORK
+RUN dotnet tool install --global dotnet-ef
+
+COPY . .
+
+RUN dotnet ef migrations bundle --project SoundCaseOpener.Persistence/SoundCaseOpener.Persistence.csproj --startup-project SoundCaseOpener/SoundCaseOpener.csproj --configuration $BUILD_CONFIGURATION --self-contained -r linux-musl-x64 --output /app/migration-bundle
+
+FROM alpine:latest AS final
+RUN apk add --no-cache gcompat libstdc++ icu-libs
+WORKDIR /app
+COPY --from=build /app/migration-bundle ./
+ENTRYPOINT ["./migration-bundle"]
