@@ -1,0 +1,11 @@
+﻿http://localhost:5100 {
+  reverse_proxy sound-case-opener-frontend:80
+}
+
+http://localhost:5102 {
+      root * /srv/sounds
+      file_server
+
+      # Set caching headers (adjust max-age as needed)
+      header Cache-Control "public, max-age=86400"
+}

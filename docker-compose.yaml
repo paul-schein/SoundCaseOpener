@@ -1,0 +1,51 @@
+services:
+  ingress:
+    container_name: sound-case-opener-ingress
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "5100:5100"
+      - "5101:5101"
+      - "5102:5102"
+      # prod port
+      #- "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - sound_case_opener-sounds:/srv/sounds:ro
+    networks:
+      - sound_case_opener_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "7"
+    depends_on:
+      frontend:
+        condition: service_started
+
+  frontend:
+    container_name: sound-case-opener-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: sound-case-opener-frontend
+    restart: unless-stopped
+    expose:
+      - "80"
+    volumes:
+      - ./frontend-config.json:/var/www/html/app-config.json:ro
+    networks:
+      - sound_case_opener_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+networks:
+  sound_case_opener_net:
+    driver: bridge
+
+volumes:
+  sound_case_opener-sounds:
+    external: true
