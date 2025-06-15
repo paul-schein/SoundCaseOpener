@@ -30,7 +30,7 @@ internal sealed class SoundTemplateService(IUnitOfWork uow,
         SoundTemplate? soundTemplate = await uow.SoundTemplateRepository.GetByIdAsync(id);
         if (soundTemplate is null)
         {
-            logger.LogWarning("Sound template with id {Id} not found", id);
+            logger.LogInformation("Sound template with id {Id} not found", id);
             return new NotFound();
         }
         
@@ -47,7 +47,7 @@ internal sealed class SoundTemplateService(IUnitOfWork uow,
         SoundFile? soundFile = await uow.SoundFileRepository.GetByIdAsync(soundFileId, true);
         if (soundFile is null)
         {
-            logger.LogWarning("Sound file with id {Id} not found", soundFileId);
+            logger.LogInformation("Sound file with id {Id} not found", soundFileId);
             return new NotFound();
         }
         
@@ -76,7 +76,7 @@ internal sealed class SoundTemplateService(IUnitOfWork uow,
         SoundTemplate? soundTemplate = await uow.SoundTemplateRepository.GetByIdAsync(id, true);
         if (soundTemplate is null)
         {
-            logger.LogWarning("Sound template with id {Id} not found", id);
+            logger.LogInformation("Sound template with id {Id} not found", id);
             return new NotFound();
         }
         

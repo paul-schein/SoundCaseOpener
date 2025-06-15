@@ -19,6 +19,8 @@ public interface IUnitOfWork
     public ISoundFileRepository SoundFileRepository { get; }
     public ITemplateRepository<SoundTemplate> SoundTemplateRepository { get; }
     public ITemplateRepository<CaseTemplate> CaseTemplateRepository { get; }
+    public ITemplateRepository<ItemTemplate> ItemTemplateRepository { get; }
+    public ICaseItemRepository CaseItemRepository { get; }
     
     public Task SaveChangesAsync();
 }
@@ -34,6 +36,9 @@ internal sealed class UnitOfWork(DatabaseContext context, ILogger<UnitOfWork> lo
         new TemplateRepository<SoundTemplate>(context.SoundTemplates);
     public ITemplateRepository<CaseTemplate> CaseTemplateRepository { get; } = 
         new TemplateRepository<CaseTemplate>(context.CaseTemplates);
+    public ITemplateRepository<ItemTemplate> ItemTemplateRepository { get; } = 
+        new TemplateRepository<ItemTemplate>(context.ItemTemplates);
+    public ICaseItemRepository CaseItemRepository { get; } = new CaseItemRepository(context.CaseItems);
     
     public async ValueTask BeginTransactionAsync()
     {

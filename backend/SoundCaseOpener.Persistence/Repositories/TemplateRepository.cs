@@ -9,6 +9,7 @@ public interface ITemplateRepository<T> where T : ItemTemplate
     public ValueTask<T?> GetByIdAsync(int id, bool tracking = false);
     public void Add(T itemTemplate);
     public void Remove(T itemTemplate);
+    public ValueTask<bool> CheckIfExists(int id);
 }
 
 internal sealed class TemplateRepository<T>(DbSet<T> templates) : ITemplateRepository<T> where T : ItemTemplate
@@ -32,7 +33,10 @@ internal sealed class TemplateRepository<T>(DbSet<T> templates) : ITemplateRepos
     {
         templates.Remove(itemTemplate);
     }
-    
+
+    public async ValueTask<bool> CheckIfExists(int id) => 
+        await TemplatesNoTracking.AnyAsync(t => t.Id == id);
+
     private IQueryable<T> GetQueryableByTracking(bool tracking) => 
         tracking ? Templates : TemplatesNoTracking;
 }

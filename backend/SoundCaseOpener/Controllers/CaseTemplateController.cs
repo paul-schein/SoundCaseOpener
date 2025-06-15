@@ -79,6 +79,121 @@ public class CaseTemplateController(ICaseTemplateService caseTemplateService,
         }
     }
     
+    [HttpPost]
+    [Route("add-item-template")]
+    [ProducesResponseType<CaseTemplateDto>(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async ValueTask<IActionResult> AddItemTemplateToCaseTemplateAsync(
+        [FromBody] AddItemTemplateToCaseTemplateRequest request)
+    {
+        if (!ValidateRequest<AddItemTemplateToCaseTemplateRequest.Validator, AddItemTemplateToCaseTemplateRequest>(
+             request, out string[]? errors))
+        {
+            logger.LogInformation("Invalid add item template to case template request");
+            return BadRequest(errors);
+        }
+
+        try
+        {
+            await transaction.BeginTransactionAsync();
+            
+            OneOf<Success, ICaseTemplateService.Conflict, NotFound> result =
+                await caseTemplateService.AddItemTemplateToCaseTemplateAsync(request.CaseTemplateId,
+                                                                             request.ItemTemplateId, 
+                                                                             request.Weight);
+            
+            return await result.Match<ValueTask<IActionResult>>(
+                async success =>
+                {
+                    await transaction.CommitAsync();
+                    return NoContent();
+                },
+                async conflict =>
+                {
+                    await transaction.RollbackAsync();
+                    return Conflict("Item template already exists in case template");
+                },
+                async notFound =>
+                {
+                    await transaction.RollbackAsync();
+                    return NotFound("Case template or item template not found");
+                });
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(e, "Error while adding item template to case template");
+            return Problem();
+        }
+    }
+    
+    [HttpDelete]
+    [Route("{caseTemplateId:int}/item-template/{itemTemplateId:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async ValueTask<IActionResult> RemoveItemTemplateFromCaseTemplateAsync(
+        [FromRoute] int caseTemplateId, [FromRoute] int itemTemplateId)
+    {
+        if (caseTemplateId <= 0 || itemTemplateId <= 0)
+        {
+            logger.LogInformation("Invalid case template id: {CaseTemplateId} or item template id: {ItemTemplateId}",
+                                  caseTemplateId, itemTemplateId);
+            return BadRequest("Invalid case template id or item template id");
+        }
+
+        try
+        {
+            await transaction.BeginTransactionAsync();
+            
+            OneOf<Success, NotFound> result =
+                await caseTemplateService.RemoveItemTemplateFromCaseTemplateAsync(caseTemplateId, 
+                                                                                  itemTemplateId);
+            
+            return await result.Match<ValueTask<IActionResult>>(
+                async success =>
+                {
+                    await transaction.CommitAsync();
+                    return NoContent();
+                },
+                async notFound =>
+                {
+                    await transaction.RollbackAsync();
+                    return NotFound("Case template or item template not found");
+                });
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(e, "Error while removing item template from case template");
+            return Problem();
+        }
+    }
+    
+    [HttpGet]
+    [Route("{id:int}/sound-templates")]
+    [ProducesResponseType<AllSoundTemplatesResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async ValueTask<ActionResult<AllSoundTemplatesResponse>> GetSoundTemplatesByCaseTemplateIdAsync(
+        [FromRoute] int id)
+    {
+        if (id <= 0)
+        {
+            logger.LogInformation("Invalid case template id: {Id}", id);
+            return BadRequest("Invalid case template id");
+        }
+
+        OneOf<Success<IReadOnlyCollection<SoundTemplate>>, NotFound> result = 
+            await caseTemplateService.GetAllSoundTemplatesInCaseTemplateAsync(id);
+
+        return result.Match<ActionResult<AllSoundTemplatesResponse>>(
+                            success => Ok(new AllSoundTemplatesResponse(
+                                                success.Value.Select(SoundTemplateDto.FromSoundTemplate).ToList())),
+                            notFound => NotFound("Case template not found"));;
+    }
+    
     [HttpDelete]
     [Route("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -113,6 +228,23 @@ public class CaseTemplateController(ICaseTemplateService caseTemplateService,
             await transaction.RollbackAsync();
             logger.LogError(e, "Error while deleting case template");
             return Problem();
+        }
+    }
+    
+}
+
+public sealed record AddItemTemplateToCaseTemplateRequest(int CaseTemplateId, int ItemTemplateId, double Weight)
+{
+    public sealed class Validator : AbstractValidator<AddItemTemplateToCaseTemplateRequest>
+    {
+        public Validator()
+        {
+            RuleFor(x => x.CaseTemplateId)
+                .GreaterThan(0);
+            RuleFor(x => x.ItemTemplateId)
+                .GreaterThan(0);
+            RuleFor(x => x.Weight)
+                .GreaterThan(0);
         }
     }
 }

@@ -29,7 +29,7 @@ internal sealed class SoundFileService(IUnitOfWork uow,
         SoundFile? soundFile = await uow.SoundFileRepository.GetByIdAsync(id);
         if (soundFile is null)
         {
-            logger.LogWarning("Sound file with id {Id} not found", id);
+            logger.LogInformation("Sound file with id {Id} not found", id);
             return new NotFound();
         }
         
@@ -76,7 +76,7 @@ internal sealed class SoundFileService(IUnitOfWork uow,
         SoundFile? soundFile = await uow.SoundFileRepository.GetByIdAsync(id, true);
         if (soundFile is null)
         {
-            logger.LogWarning("Sound file with id {Id} not found", id);
+            logger.LogInformation("Sound file with id {Id} not found", id);
             return new NotFound();
         }
         
@@ -97,7 +97,7 @@ internal sealed class SoundFileService(IUnitOfWork uow,
         SoundFile? soundFile = await uow.SoundFileRepository.GetByIdAsync(id, true);
         if (soundFile is null)
         {
-            logger.LogWarning("Sound file with id {Id} not found", id);
+            logger.LogInformation("Sound file with id {Id} not found", id);
             return new NotFound();
         }
         

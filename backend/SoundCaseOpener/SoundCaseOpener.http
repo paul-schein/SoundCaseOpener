@@ -72,9 +72,6 @@ Content-Type: application/json
 ### Get Sound Template by ID
 GET {{Host}}/api/sound-templates/{{soundTemplateId}}
 
-### Delete Sound Template by ID
-DELETE {{Host}}/api/sound-templates/{{soundTemplateId}}
-
 ### Get all Case Templates
 GET {{Host}}/api/case-templates
 
@@ -83,8 +80,8 @@ POST {{Host}}/api/case-templates
 Content-Type: application/json
 
 {
-  "name": "Test Sound Template",
-  "description": "This is a test sound template",
+  "name": "Test Case Template",
+  "description": "This is a test case template",
   "rarity": "common"
 }
 
@@ -95,8 +92,33 @@ Content-Type: application/json
 ### Get Case Template by ID
 GET {{Host}}/api/case-templates/{{caseTemplateId}}
 
+### Get all Sound Templates in a Case Template
+GET {{Host}}/api/case-templates/{{caseTemplateId}}/sound-templates
+
+### Add Sound Template to Case Template
+POST {{Host}}/api/case-templates/add-item-template
+Content-Type: application/json
+
+{
+  "caseTemplateId": "{{caseTemplateId}}",
+  "itemTemplateId": "{{soundTemplateId}}",
+  "weight": 1
+}
+
+### Get all Sound Templates in a Case Template again
+GET {{Host}}/api/case-templates/{{caseTemplateId}}/sound-templates
+
+###
+DELETE {{Host}}/api/case-templates/{{caseTemplateId}}/item-template/{{soundTemplateId}}
+
+### Get all Sound Templates in a Case Template again
+GET {{Host}}/api/case-templates/{{caseTemplateId}}/sound-templates
+
 ### Delete Case Template by ID
 DELETE {{Host}}/api/case-templates/{{caseTemplateId}}
+
+### Delete Sound Template by ID
+DELETE {{Host}}/api/sound-templates/{{soundTemplateId}}
 
 ### Delete Sound File by ID
 DELETE {{Host}}/api/sound-files/{{soundFileId}}
