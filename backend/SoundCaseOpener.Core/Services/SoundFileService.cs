@@ -16,6 +16,8 @@ public interface ISoundFileService
         Func<Stream, CancellationToken, Task> fileCopier,
         string fileExtension,
         CancellationToken cancellationToken);
+    public ValueTask<OneOf<Success, NotFound>> DeleteSoundFileAsync(int id);
+    public ValueTask<OneOf<Success<SoundFile>, NotFound>> ChangeSoundFileNameAsync(int id, string newName);
 }
 
 internal sealed class SoundFileService(IUnitOfWork uow,
@@ -24,7 +26,7 @@ internal sealed class SoundFileService(IUnitOfWork uow,
 {
     public async ValueTask<OneOf<SoundFile, NotFound>> GetSoundFileByIdAsync(int id)
     {
-        SoundFile? soundFile = await uow.SoundFileRepository.GetByIdAsync(id, false);
+        SoundFile? soundFile = await uow.SoundFileRepository.GetByIdAsync(id);
         if (soundFile is null)
         {
             logger.LogWarning("Sound file with id {Id} not found", id);
@@ -67,5 +69,44 @@ internal sealed class SoundFileService(IUnitOfWork uow,
                               soundFile.Id, soundFile.FilePath);
         
         return soundFile;
+    }
+
+    public async ValueTask<OneOf<Success, NotFound>> DeleteSoundFileAsync(int id)
+    {
+        SoundFile? soundFile = await uow.SoundFileRepository.GetByIdAsync(id, true);
+        if (soundFile is null)
+        {
+            logger.LogWarning("Sound file with id {Id} not found", id);
+            return new NotFound();
+        }
+        
+        uow.SoundFileRepository.Remove(soundFile);
+        await uow.SaveChangesAsync();
+        
+        string wholeFilePath = Path.Combine(settings.Value.SoundFilesPath, soundFile.FilePath);
+        File.Delete(wholeFilePath);
+        
+        logger.LogInformation("Sound file with id {Id} and filepath {FilePath} deleted", 
+                              soundFile.Id, wholeFilePath);
+        
+        return new Success();
+    }
+
+    public async ValueTask<OneOf<Success<SoundFile>, NotFound>> ChangeSoundFileNameAsync(int id, string newName)
+    {
+        SoundFile? soundFile = await uow.SoundFileRepository.GetByIdAsync(id, true);
+        if (soundFile is null)
+        {
+            logger.LogWarning("Sound file with id {Id} not found", id);
+            return new NotFound();
+        }
+        
+        soundFile.Name = newName;
+        await uow.SaveChangesAsync();
+        
+        logger.LogInformation("Sound file with id {Id} changed name to {NewName}", 
+                              soundFile.Id, newName);
+        
+        return new Success<SoundFile>(soundFile);
     }
 }

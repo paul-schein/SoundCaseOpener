@@ -2,12 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using OneOf;
+using OneOf.Types;
 using SoundCaseOpener.Core.Services;
 using SoundCaseOpener.Core.Util;
 using SoundCaseOpener.Persistence.Model;
 using SoundCaseOpener.Persistence.Util;
 using SoundCaseOpener.Shared;
 using SoundCaseOpener.Util;
+using NotFound = OneOf.Types.NotFound;
 
 namespace SoundCaseOpener.Controllers;
 
@@ -30,10 +32,19 @@ public class SoundFileController(ISoundFileService soundFileService,
     [Route("{id:int}")]
     [ProducesResponseType<SoundFileDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async ValueTask<ActionResult<SoundFileDto>> GetSoundFileById([FromRoute] int id) =>
-        (await soundFileService.GetSoundFileByIdAsync(id))
-        .Match<ActionResult<SoundFileDto>>(soundFile => Ok(SoundFileDto.FromSoundFile(soundFile)),
-                                           notFound => NotFound());
+    public async ValueTask<ActionResult<SoundFileDto>> GetSoundFileById([FromRoute] int id)
+    {
+        if (id <= 0)
+        {
+            logger.LogInformation("Invalid sound file id: {Id}", id);
+            return BadRequest("Invalid sound file id");
+        }
+        
+        return (await soundFileService.GetSoundFileByIdAsync(id))
+            .Match<ActionResult<SoundFileDto>>(soundFile => Ok(SoundFileDto.FromSoundFile(soundFile)),
+                                               notFound => NotFound());
+    }
+        
 
     [HttpPost]
     [Route("{name}")]
@@ -42,6 +53,12 @@ public class SoundFileController(ISoundFileService soundFileService,
                                                                          IFormFile file,
                                                                          CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(name) || name.Length > Const.MaxSoundNameLength)
+        {
+            logger.LogInformation("Invalid sound file name: {Name}", name);
+            return BadRequest("Invalid sound file name");
+        }
+        
         if (file.Length == 0)
         {
             logger.LogInformation("Empty file upload attempt");
@@ -77,7 +94,86 @@ public class SoundFileController(ISoundFileService soundFileService,
         catch (Exception e)
         {
             await transaction.RollbackAsync();
-            logger.LogError(e, "Failed to upload sound file");
+            logger.LogError(e, "Error while adding sound file");
+            return Problem();
+        }
+    }
+    
+    [HttpDelete]
+    [Route("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async ValueTask<IActionResult> DeleteSoundFileAsync([FromRoute] int id)
+    {
+        if (id <= 0)
+        {
+            logger.LogInformation("Invalid sound file id: {Id}", id);
+            return BadRequest("Invalid sound file id");
+        }
+
+        try
+        {
+            await transaction.BeginTransactionAsync();
+            
+            OneOf<Success, NotFound> result = await soundFileService.DeleteSoundFileAsync(id);
+            return await result.Match<ValueTask<IActionResult>>(async success =>
+                                                                {
+                                                                    await transaction.CommitAsync();
+                                                                    return NoContent();
+                                                                },
+                                                                async notFound =>
+                                                                {
+                                                                    await transaction.RollbackAsync();
+                                                                    return NotFound();
+                                                                });
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(e, "Error while deleting sound file");
+            return Problem();
+        }
+    }
+    
+    [HttpPatch]
+    [Route("{id:int}/name/{newName}")]
+    [ProducesResponseType<SoundFileDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async ValueTask<IActionResult> ChangeSoundFileNameAsync([FromRoute] int id, 
+                                                                   [FromRoute] string newName)
+    {
+        if (id <= 0)
+        {
+            logger.LogInformation("Invalid sound file id: {Id}", id);
+            return BadRequest("Invalid sound file id");
+        }
+
+        if (string.IsNullOrWhiteSpace(newName) || newName.Length > Const.MaxSoundNameLength)
+        {
+            logger.LogInformation("Invalid sound file name: {NewName}", newName);
+            return BadRequest("Invalid sound file name");
+        }
+
+        try
+        {
+            await transaction.BeginTransactionAsync();
+            
+            OneOf<Success<SoundFile>, NotFound> result = await soundFileService.ChangeSoundFileNameAsync(id, newName);
+            return await result.Match<ValueTask<IActionResult>>(async success => 
+                                                                { 
+                                                                    await transaction.CommitAsync(); 
+                                                                    return Ok(SoundFileDto.FromSoundFile(success.Value)); 
+                                                                },
+                                                                async notFound => 
+                                                                { 
+                                                                    await transaction.RollbackAsync(); 
+                                                                    return NotFound(); 
+                                                                });
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(e, "Error while changing sound file name");
             return Problem();
         }
     }

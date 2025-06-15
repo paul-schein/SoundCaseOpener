@@ -42,3 +42,15 @@ Content-Type: text/plain
 
 ####
 GET {{Host}}/api/soundFiles/{{soundFileId}}
+
+###
+PATCH {{Host}}/api/soundFiles/{{soundFileId}}/name/test2
+
+###
+GET {{Host}}/api/soundFiles/{{soundFileId}}
+
+###
+DELETE {{Host}}/api/soundFiles/{{soundFileId}}
+
+###
+GET {{Host}}/api/soundFiles

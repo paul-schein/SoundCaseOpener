@@ -6,8 +6,9 @@ namespace SoundCaseOpener.Persistence.Repositories;
 public interface ISoundFileRepository
 {
     public ValueTask<IReadOnlyCollection<SoundFile>> GetAllAsync();
-    public ValueTask<SoundFile?> GetByIdAsync(int id, bool tracking);
+    public ValueTask<SoundFile?> GetByIdAsync(int id, bool tracking = false);
     public void Add(SoundFile soundFile);
+    public void Remove(SoundFile soundFile);
 }
 
 internal sealed class SoundFileRepository(DbSet<SoundFile> soundFiles) : ISoundFileRepository
@@ -26,7 +27,12 @@ internal sealed class SoundFileRepository(DbSet<SoundFile> soundFiles) : ISoundF
     {
         soundFiles.Add(soundFile);
     }
-    
+
+    public void Remove(SoundFile soundFile)
+    {
+        soundFiles.Remove(soundFile);
+    }
+
     private IQueryable<SoundFile> GetQueryableByTracking(bool tracking) => 
         tracking ? SoundFiles : SoundFilesNoTracking;
 }
