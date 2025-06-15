@@ -13,7 +13,7 @@ Content-Type: application/json
 %}
 
 ### Get User by ID
-GET {{Host}}/api/users/{{userId}}
+GET {{Host}}/api/users/1
 
 ### Get User by Username
 GET {{Host}}/api/users/username/tsolmonbat
@@ -48,6 +48,32 @@ PATCH {{Host}}/api/sound-files/{{soundFileId}}/name/test2
 
 ###
 GET {{Host}}/api/sound-files/{{soundFileId}}
+
+###
+GET {{Host}}/api/sound-templates
+
+###
+POST {{Host}}/api/sound-templates
+Content-Type: application/json
+
+{
+  "name": "Test Sound Template",
+  "description": "This is a test sound template",
+  "rarity": "common",
+  "minCooldown": 10,
+  "maxCooldown": 20,
+  "soundFileId": "{{soundFileId}}"
+}
+
+> {% 
+    client.global.set("soundTemplateId", response.body.id)
+%}
+
+###
+GET {{Host}}/api/sound-templates/{{soundTemplateId}}
+
+###
+DELETE {{Host}}/api/sound-templates/{{soundTemplateId}}
 
 ###
 DELETE {{Host}}/api/sound-files/{{soundFileId}}
