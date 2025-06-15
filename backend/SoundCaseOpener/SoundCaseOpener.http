@@ -30,8 +30,8 @@ POST {{Host}}/api/sound-files/test
 Content-Type: multipart/form-data; boundary=----TestBoundary
 
 ------TestBoundary
-Content-Disposition: form-data; name="file"; filename="test.txt"
-Content-Type: text/plain
+Content-Disposition: form-data; name="file"; filename="test.mp3"
+Content-Type: audio/mpeg
 
 < Data/test.txt
 ------TestBoundary--
