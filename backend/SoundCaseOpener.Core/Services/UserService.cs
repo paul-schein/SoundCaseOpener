@@ -23,7 +23,7 @@ internal sealed class UserService(IUnitOfWork uow,
         User? user = await uow.UserRepository.GetUserByUserNameAsync(username);
         if (user is null)
         {
-            logger.LogWarning("User with username {Username} not found", username);
+            logger.LogInformation("User with username {Username} not found", username);
             return new NotFound();
         }
 
@@ -35,7 +35,7 @@ internal sealed class UserService(IUnitOfWork uow,
         User? user = await uow.UserRepository.GetUserByIdAsync(id, false);
         if (user is null)
         {
-            logger.LogWarning("User with id {Id} not found", id);
+            logger.LogInformation("User with id {Id} not found", id);
             return new NotFound();
         }
 
@@ -69,7 +69,7 @@ internal sealed class UserService(IUnitOfWork uow,
         Role? role = await uow.UserRepository.GetUserRoleByIdAsync(id);
         if (role is null)
         {
-            logger.LogWarning("Role for user with id {Id} not found", id);
+            logger.LogInformation("Role for user with id {Id} not found", id);
             return new NotFound();
         }
 

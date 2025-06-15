@@ -13,7 +13,7 @@ Content-Type: application/json
 %}
 
 ### Get User by ID
-GET {{Host}}/api/users/{{userId}}
+GET {{Host}}/api/users/1
 
 ### Get User by Username
 GET {{Host}}/api/users/username/tsolmonbat
@@ -22,16 +22,16 @@ GET {{Host}}/api/users/username/tsolmonbat
     client.global.set("userId", response.body.id)
 %}
 
-###
-GET {{Host}}/api/soundFiles
+### Get all Sound Files
+GET {{Host}}/api/sound-files
 
-###
-POST {{Host}}/api/soundFiles/test
+### Upload new Sound File
+POST {{Host}}/api/sound-files/test
 Content-Type: multipart/form-data; boundary=----TestBoundary
 
 ------TestBoundary
-Content-Disposition: form-data; name="file"; filename="test.txt"
-Content-Type: text/plain
+Content-Disposition: form-data; name="file"; filename="test.mp3"
+Content-Type: audio/mpeg
 
 < Data/test.txt
 ------TestBoundary--
@@ -40,17 +40,88 @@ Content-Type: text/plain
     client.global.set("soundFileId", response.body.id)
 %}
 
-####
-GET {{Host}}/api/soundFiles/{{soundFileId}}
+### Get Sound File by ID
+GET {{Host}}/api/sound-files/{{soundFileId}}
+
+### Update Sound File Name
+PATCH {{Host}}/api/sound-files/{{soundFileId}}/name/test2
+
+### Get Sound File by ID again
+GET {{Host}}/api/sound-files/{{soundFileId}}
+
+### Get all Sound Templates
+GET {{Host}}/api/sound-templates
+
+### Create a new Sound Template
+POST {{Host}}/api/sound-templates
+Content-Type: application/json
+
+{
+  "name": "Test Sound Template",
+  "description": "This is a test sound template",
+  "rarity": "common",
+  "minCooldown": 10,
+  "maxCooldown": 20,
+  "soundFileId": "{{soundFileId}}"
+}
+
+> {% 
+    client.global.set("soundTemplateId", response.body.id)
+%}
+
+### Get Sound Template by ID
+GET {{Host}}/api/sound-templates/{{soundTemplateId}}
+
+### Get all Case Templates
+GET {{Host}}/api/case-templates
+
+### Create a new Case Template
+POST {{Host}}/api/case-templates
+Content-Type: application/json
+
+{
+  "name": "Test Case Template",
+  "description": "This is a test case template",
+  "rarity": "common"
+}
+
+> {%
+    client.global.set("caseTemplateId", response.body.id)
+%}
+
+### Get Case Template by ID
+GET {{Host}}/api/case-templates/{{caseTemplateId}}
+
+### Get all Sound Templates in a Case Template
+GET {{Host}}/api/case-templates/{{caseTemplateId}}/sound-templates
+
+### Add Sound Template to Case Template
+POST {{Host}}/api/case-templates/add-item-template
+Content-Type: application/json
+
+{
+  "caseTemplateId": "{{caseTemplateId}}",
+  "itemTemplateId": "{{soundTemplateId}}",
+  "weight": 1
+}
+
+### Get all Sound Templates in a Case Template again
+GET {{Host}}/api/case-templates/{{caseTemplateId}}/sound-templates
 
 ###
-PATCH {{Host}}/api/soundFiles/{{soundFileId}}/name/test2
+DELETE {{Host}}/api/case-templates/{{caseTemplateId}}/item-template/{{soundTemplateId}}
 
-###
-GET {{Host}}/api/soundFiles/{{soundFileId}}
+### Get all Sound Templates in a Case Template again
+GET {{Host}}/api/case-templates/{{caseTemplateId}}/sound-templates
 
-###
-DELETE {{Host}}/api/soundFiles/{{soundFileId}}
+### Delete Case Template by ID
+DELETE {{Host}}/api/case-templates/{{caseTemplateId}}
 
-###
-GET {{Host}}/api/soundFiles
+### Delete Sound Template by ID
+DELETE {{Host}}/api/sound-templates/{{soundTemplateId}}
+
+### Delete Sound File by ID
+DELETE {{Host}}/api/sound-files/{{soundFileId}}
+
+### Get all Sound Files again
+GET {{Host}}/api/sound-files

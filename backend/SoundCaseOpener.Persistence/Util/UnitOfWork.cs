@@ -1,6 +1,7 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using SoundCaseOpener.Persistence.Model;
 using SoundCaseOpener.Persistence.Repositories;
 
 namespace SoundCaseOpener.Persistence.Util;
@@ -16,6 +17,10 @@ public interface IUnitOfWork
 {
     public IUserRepository UserRepository { get; }
     public ISoundFileRepository SoundFileRepository { get; }
+    public ITemplateRepository<SoundTemplate> SoundTemplateRepository { get; }
+    public ITemplateRepository<CaseTemplate> CaseTemplateRepository { get; }
+    public ITemplateRepository<ItemTemplate> ItemTemplateRepository { get; }
+    public ICaseItemRepository CaseItemRepository { get; }
     
     public Task SaveChangesAsync();
 }
@@ -27,6 +32,13 @@ internal sealed class UnitOfWork(DatabaseContext context, ILogger<UnitOfWork> lo
 
     public IUserRepository UserRepository { get; } = new UserRepository(context.Users);
     public ISoundFileRepository SoundFileRepository { get; } = new SoundFileRepository(context.SoundFiles);
+    public ITemplateRepository<SoundTemplate> SoundTemplateRepository { get; } = 
+        new TemplateRepository<SoundTemplate>(context.SoundTemplates);
+    public ITemplateRepository<CaseTemplate> CaseTemplateRepository { get; } = 
+        new TemplateRepository<CaseTemplate>(context.CaseTemplates);
+    public ITemplateRepository<ItemTemplate> ItemTemplateRepository { get; } = 
+        new TemplateRepository<ItemTemplate>(context.ItemTemplates);
+    public ICaseItemRepository CaseItemRepository { get; } = new CaseItemRepository(context.CaseItems);
     
     public async ValueTask BeginTransactionAsync()
     {
