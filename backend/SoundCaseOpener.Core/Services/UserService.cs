@@ -1,5 +1,4 @@
-﻿using System.Data;
-using OneOf;
+﻿using OneOf;
 using OneOf.Types;
 using SoundCaseOpener.Persistence.Model;
 using SoundCaseOpener.Persistence.Util;

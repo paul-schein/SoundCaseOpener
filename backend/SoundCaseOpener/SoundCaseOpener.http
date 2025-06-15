@@ -21,3 +21,36 @@ GET {{Host}}/api/users/username/tsolmonbat
 > {%
     client.global.set("userId", response.body.id)
 %}
+
+###
+GET {{Host}}/api/soundFiles
+
+###
+POST {{Host}}/api/soundFiles/test
+Content-Type: multipart/form-data; boundary=----TestBoundary
+
+------TestBoundary
+Content-Disposition: form-data; name="file"; filename="test.txt"
+Content-Type: text/plain
+
+< Data/test.txt
+------TestBoundary--
+
+> {%
+    client.global.set("soundFileId", response.body.id)
+%}
+
+####
+GET {{Host}}/api/soundFiles/{{soundFileId}}
+
+###
+PATCH {{Host}}/api/soundFiles/{{soundFileId}}/name/test2
+
+###
+GET {{Host}}/api/soundFiles/{{soundFileId}}
+
+###
+DELETE {{Host}}/api/soundFiles/{{soundFileId}}
+
+###
+GET {{Host}}/api/soundFiles

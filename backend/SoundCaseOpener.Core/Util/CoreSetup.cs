@@ -10,5 +10,6 @@ public static class CoreSetup
         services.AddSingleton<IClock>(SystemClock.Instance);
         
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ISoundFileService, SoundFileService>();
     }
 }

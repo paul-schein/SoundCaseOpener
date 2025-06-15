@@ -15,6 +15,7 @@ public interface ITransactionProvider : IAsyncDisposable, IDisposable
 public interface IUnitOfWork
 {
     public IUserRepository UserRepository { get; }
+    public ISoundFileRepository SoundFileRepository { get; }
     
     public Task SaveChangesAsync();
 }
@@ -25,6 +26,7 @@ internal sealed class UnitOfWork(DatabaseContext context, ILogger<UnitOfWork> lo
     private IDbContextTransaction? _transaction;
 
     public IUserRepository UserRepository { get; } = new UserRepository(context.Users);
+    public ISoundFileRepository SoundFileRepository { get; } = new SoundFileRepository(context.SoundFiles);
     
     public async ValueTask BeginTransactionAsync()
     {
