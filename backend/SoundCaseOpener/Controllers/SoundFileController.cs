@@ -32,6 +32,7 @@ public class SoundFileController(ISoundFileService soundFileService,
     [Route("{id:int}")]
     [ProducesResponseType<SoundFileDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async ValueTask<ActionResult<SoundFileDto>> GetSoundFileById([FromRoute] int id)
     {
         if (id <= 0)
@@ -49,6 +50,7 @@ public class SoundFileController(ISoundFileService soundFileService,
     [HttpPost]
     [Route("{name}")]
     [ProducesResponseType<SoundFileDto>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async ValueTask<ActionResult<SoundFileDto>> AddSoundFileAsync([FromRoute] string name, 
                                                                          IFormFile file,
                                                                          CancellationToken cancellationToken)
@@ -103,6 +105,7 @@ public class SoundFileController(ISoundFileService soundFileService,
     [Route("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async ValueTask<IActionResult> DeleteSoundFileAsync([FromRoute] int id)
     {
         if (id <= 0)
@@ -139,6 +142,7 @@ public class SoundFileController(ISoundFileService soundFileService,
     [Route("{id:int}/name/{newName}")]
     [ProducesResponseType<SoundFileDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async ValueTask<IActionResult> ChangeSoundFileNameAsync([FromRoute] int id, 
                                                                    [FromRoute] string newName)
     {

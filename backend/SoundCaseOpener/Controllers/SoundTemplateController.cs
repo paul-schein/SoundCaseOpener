@@ -26,6 +26,7 @@ public class SoundTemplateController(ISoundTemplateService soundTemplateService,
     [Route("{id:int}")]
     [ProducesResponseType<SoundTemplateDto>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async ValueTask<ActionResult<SoundTemplateDto>> GetSoundTemplateById([FromRoute] int id)
     {
         if (id <= 0)
@@ -43,6 +44,7 @@ public class SoundTemplateController(ISoundTemplateService soundTemplateService,
     [Route("")]
     [ProducesResponseType<SoundTemplateDto>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async ValueTask<ActionResult<SoundTemplateDto>> AddSoundTemplateAsync(
         [FromBody] CreateSoundTemplateRequest request)
     {
@@ -95,6 +97,7 @@ public class SoundTemplateController(ISoundTemplateService soundTemplateService,
     [Route("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async ValueTask<IActionResult> DeleteSoundTemplateAsync([FromRoute] int id)
     {
         if (id <= 0)

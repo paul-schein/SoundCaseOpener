@@ -22,8 +22,7 @@ public class UserController(IUserService userService,
     public async ValueTask<ActionResult<UserDto>> GetUserByUsername([FromRoute] string username) =>
         (await userService.GetUserByUsername(username)).Match<ActionResult<UserDto>>(
              user => Ok(UserDto.FromUser(user)),
-             notFound => NotFound()
-            );
+             notFound => NotFound());
     
     [HttpGet]
     [Route("{id:int}")]
@@ -32,13 +31,13 @@ public class UserController(IUserService userService,
     public async ValueTask<ActionResult<UserDto>> GetUserById([FromRoute] int id) =>
         (await userService.GetUserById(id)).Match<ActionResult<UserDto>>(
              user => Ok(UserDto.FromUser(user)),
-             notFound => NotFound()
-            );
+             notFound => NotFound());
     
     [HttpPost]
     [Route("")]
     [ProducesResponseType<UserDto>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async ValueTask<ActionResult<UserDto>> AddUser([FromBody] CreateUserRequest request)
     {
         if (!ValidateRequest<CreateUserRequest.Validator, CreateUserRequest>(request, out string[]? errors))
