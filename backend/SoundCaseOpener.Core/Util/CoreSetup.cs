@@ -11,5 +11,6 @@ public static class CoreSetup
         
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ISoundFileService, SoundFileService>();
+        services.AddScoped<ISoundTemplateService, SoundTemplateService>();
     }
 }
