@@ -13,7 +13,7 @@ using NotFound = OneOf.Types.NotFound;
 
 namespace SoundCaseOpener.Controllers;
 
-[Route("api/soundFiles")]
+[Route("api/sound-files")]
 public class SoundFileController(ISoundFileService soundFileService,
                                  ITransactionProvider transaction,
                                  ILogger<SoundFileController> logger,

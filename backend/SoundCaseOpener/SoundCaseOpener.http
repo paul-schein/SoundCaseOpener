@@ -23,10 +23,10 @@ GET {{Host}}/api/users/username/tsolmonbat
 %}
 
 ###
-GET {{Host}}/api/soundFiles
+GET {{Host}}/api/sound-files
 
 ###
-POST {{Host}}/api/soundFiles/test
+POST {{Host}}/api/sound-files/test
 Content-Type: multipart/form-data; boundary=----TestBoundary
 
 ------TestBoundary
@@ -41,16 +41,16 @@ Content-Type: text/plain
 %}
 
 ####
-GET {{Host}}/api/soundFiles/{{soundFileId}}
+GET {{Host}}/api/sound-files/{{soundFileId}}
 
 ###
-PATCH {{Host}}/api/soundFiles/{{soundFileId}}/name/test2
+PATCH {{Host}}/api/sound-files/{{soundFileId}}/name/test2
 
 ###
-GET {{Host}}/api/soundFiles/{{soundFileId}}
+GET {{Host}}/api/sound-files/{{soundFileId}}
 
 ###
-DELETE {{Host}}/api/soundFiles/{{soundFileId}}
+DELETE {{Host}}/api/sound-files/{{soundFileId}}
 
 ###
-GET {{Host}}/api/soundFiles
+GET {{Host}}/api/sound-files
