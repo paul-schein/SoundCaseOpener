@@ -16,7 +16,7 @@ public interface ICaseTemplateService
     public ValueTask<OneOf<Success, Conflict, NotFound>> AddItemTemplateToCaseTemplateAsync(
         int caseTemplateId,
         int itemTemplateId,
-        double chance);
+        double weight);
     public ValueTask<OneOf<Success, NotFound>> RemoveItemTemplateFromCaseTemplateAsync(
         int caseTemplateId,
         int itemTemplateId);
@@ -66,7 +66,7 @@ internal sealed class CaseTemplateService(IUnitOfWork uow,
     }
 
     public async ValueTask<OneOf<Success, ICaseTemplateService.Conflict, NotFound>> AddItemTemplateToCaseTemplateAsync(
-        int caseTemplateId, int itemTemplateId, double chance)
+        int caseTemplateId, int itemTemplateId, double weight)
     {
         if (await uow.CaseItemRepository.CheckIfCaseItemExistsAsync(caseTemplateId, itemTemplateId))
         {
@@ -91,13 +91,13 @@ internal sealed class CaseTemplateService(IUnitOfWork uow,
         {
             CaseTemplate = caseTemplate,
             ItemTemplate = itemTemplate,
-            Chance = chance
+            Weight = weight
         };
         uow.CaseItemRepository.Add(caseItem);
         await uow.SaveChangesAsync();
         
         logger.LogInformation("Item template with id {ItemTemplateId} added to case template with id {CaseTemplateId} with chance {Chance}",
-                              itemTemplateId, caseTemplateId, chance);
+                              itemTemplateId, caseTemplateId, weight);
         
         return new Success();
     }

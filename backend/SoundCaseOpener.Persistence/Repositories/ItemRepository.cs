@@ -19,11 +19,13 @@ internal sealed class ItemRepository<T>(DbSet<T> items) : IItemRepository<T> whe
     public async ValueTask<IReadOnlyCollection<T>> GetAllItemsOfUserAsync(int userId) =>
         await ItemsNoTracking
               .Where(i => i.OwnerId == userId)
+              .Include(i => i.Template)
               .ToListAsync();
 
     public async ValueTask<T?> GetByIdAsync(int id, bool tracking = false) => 
         await GetQueryableByTracking(tracking)
-            .FirstOrDefaultAsync(i => i.Id == id);
+              .Include(i => i.Template)
+              .FirstOrDefaultAsync(i => i.Id == id);
 
     public void Add(T item)
     {

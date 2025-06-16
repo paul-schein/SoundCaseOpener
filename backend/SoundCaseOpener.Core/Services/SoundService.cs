@@ -57,7 +57,8 @@ internal sealed class SoundService(IUnitOfWork uow,
             Name = soundTemplate.Name,
             Owner = user,
             Template = soundTemplate,
-            Cooldown = Random.Shared.Next(soundTemplate.MinCooldown, soundTemplate.MaxCooldown + 1)
+            Cooldown = Random.Shared.Next(soundTemplate.MinCooldown, soundTemplate.MaxCooldown + 1),
+            LastTimeUsed = null
         };
         
         uow.SoundRepository.Add(sound);

@@ -17,5 +17,6 @@ public static class CoreSetup
         services.AddScoped<ICaseTemplateService, CaseTemplateService>();
         
         services.AddScoped<ISoundService, SoundService>();
+        services.AddScoped<ICaseService, CaseService>();
     }
 }
