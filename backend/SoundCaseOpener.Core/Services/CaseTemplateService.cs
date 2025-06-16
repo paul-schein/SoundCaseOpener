@@ -1,6 +1,7 @@
 ﻿using OneOf;
 using OneOf.Types;
 using SoundCaseOpener.Persistence.Model;
+using SoundCaseOpener.Persistence.Repositories;
 using SoundCaseOpener.Persistence.Util;
 
 namespace SoundCaseOpener.Core.Services;
@@ -20,8 +21,8 @@ public interface ICaseTemplateService
     public ValueTask<OneOf<Success, NotFound>> RemoveItemTemplateFromCaseTemplateAsync(
         int caseTemplateId,
         int itemTemplateId);
-    public ValueTask<OneOf<Success<IReadOnlyCollection<SoundTemplate>>, NotFound>> GetAllSoundTemplatesInCaseTemplateAsync(
-        int caseTemplateId);
+    public ValueTask<OneOf<Success<IReadOnlyCollection<ICaseItemRepository.CaseItemSoundTemplate>>, NotFound>> 
+        GetAllSoundTemplatesInCaseTemplateAsync(int caseTemplateId);
     public ValueTask<OneOf<Success, NotFound>> DeleteAsync(int id);
     
     public readonly record struct Conflict;
@@ -122,15 +123,15 @@ internal sealed class CaseTemplateService(IUnitOfWork uow,
         return new Success();
     }
 
-    public async ValueTask<OneOf<Success<IReadOnlyCollection<SoundTemplate>>, NotFound>> GetAllSoundTemplatesInCaseTemplateAsync(
-        int caseTemplateId)
+    public async ValueTask<OneOf<Success<IReadOnlyCollection<ICaseItemRepository.CaseItemSoundTemplate>>, NotFound>> 
+        GetAllSoundTemplatesInCaseTemplateAsync(int caseTemplateId)
     {
         if (!await uow.CaseTemplateRepository.CheckIfExists(caseTemplateId))
         {
             return new NotFound();
         }
         
-        return new Success<IReadOnlyCollection<SoundTemplate>>(
+        return new Success<IReadOnlyCollection<ICaseItemRepository.CaseItemSoundTemplate>>(
                                 await uow.CaseItemRepository.GetSoundTemplatesInCaseTemplateAsync(caseTemplateId));
     }
     

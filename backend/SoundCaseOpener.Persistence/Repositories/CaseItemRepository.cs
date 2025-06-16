@@ -10,7 +10,8 @@ public interface ICaseItemRepository
     public ValueTask<CaseItem?> GetCaseItemByIdsAsync(int caseTemplateId, 
                                                       int itemTemplateId, 
                                                       bool tracking = false);
-    public ValueTask<IReadOnlyCollection<CaseItemSoundTemplate>> GetSoundTemplatesInCaseTemplateAsync(int caseTemplateId);
+    public ValueTask<IReadOnlyCollection<CaseItemSoundTemplate>> GetSoundTemplatesInCaseTemplateAsync(
+        int caseTemplateId, bool tracking = false);
     public ValueTask<bool> CheckIfCaseItemExistsAsync(int caseTemplateId, int itemTemplateId);
     
     public readonly record struct CaseItemSoundTemplate(SoundTemplate Template, double Weight);
@@ -34,19 +35,21 @@ internal sealed class CaseItemRepository(DbSet<CaseItem> caseItems) : ICaseItemR
         .FirstOrDefaultAsync();
 
     public async ValueTask<IReadOnlyCollection<ICaseItemRepository.CaseItemSoundTemplate>> GetSoundTemplatesInCaseTemplateAsync(
-        int caseTemplateId) =>
-        (await CaseItemsNoTracking
-            .Where(ci => ci.CaseTemplateId == caseTemplateId
-                   && ci.ItemTemplate is SoundTemplate)
-            .Select(ci => new
-            {
-                Template = ci.ItemTemplate,
-                Weight = ci.Weight
-            })
-            .ToListAsync())
-            .Select(x => 
-                        new ICaseItemRepository.CaseItemSoundTemplate((SoundTemplate)x.Template, 
-                                                                      x.Weight))
+        int caseTemplateId, bool tracking = false) =>
+        (await GetQueryableByTracking(tracking)
+               .Where(ci => ci.CaseTemplateId == caseTemplateId 
+                            && ci.ItemTemplate is SoundTemplate)
+               .Include(ci => ci.ItemTemplate)
+               .ThenInclude(st => ((SoundTemplate)st).SoundFile)
+               .Select(ci => new
+               {
+                   Template = ci.ItemTemplate,
+                   Weight = ci.Weight
+               })
+               .ToListAsync())
+        .Select(x => 
+                    new ICaseItemRepository.CaseItemSoundTemplate((SoundTemplate)x.Template, 
+                                                                  x.Weight))
         .ToList();
 
     public async ValueTask<bool> CheckIfCaseItemExistsAsync(int caseTemplateId, int itemTemplateId) => 

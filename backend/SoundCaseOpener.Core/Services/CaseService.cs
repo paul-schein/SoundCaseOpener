@@ -1,29 +1,36 @@
-﻿using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
-using OneOf;
+﻿using OneOf;
 using OneOf.Types;
+using SoundCaseOpener.Core.Logic;
 using SoundCaseOpener.Persistence.Model;
+using SoundCaseOpener.Persistence.Repositories;
 using SoundCaseOpener.Persistence.Util;
-using SoundCaseOpener.Shared;
 
 namespace SoundCaseOpener.Core.Services;
 
 public interface ICaseService
 {
-    public ValueTask<IReadOnlyCollection<Case>> GetAllCasesOfUserAsync(int userId);
-    public ValueTask<OneOf<Success, NotFound>> ChangeCaseNameAsync(int id, string newName);
-    public ValueTask<OneOf<Success<Case>, NotFound>> CreateCaseFromTemplateForUserAsync(int userId, int soundTemplateId);
+    public ValueTask<OneOf<Success<IReadOnlyCollection<Case>>, NotFound>> GetAllCasesOfUserAsync(int userId);
+    public ValueTask<OneOf<Success<Case>, NotFound>> ChangeCaseNameAsync(int id, string newName);
     public ValueTask<OneOf<Success<Sound>, Empty, NotFound>> OpenCaseAsync(int caseId);
 
     public readonly record struct Empty;
 }
 
 internal sealed class CaseService(IUnitOfWork uow,
-                                 ILogger<CaseService> logger) : ICaseService
+                                  ILogger<CaseService> logger) : ICaseService
 {
-    public async ValueTask<IReadOnlyCollection<Case>> GetAllCasesOfUserAsync(int userId) =>
-        await uow.CaseRepository.GetAllItemsOfUserAsync(userId);
+    public async ValueTask<OneOf<Success<IReadOnlyCollection<Case>>, NotFound>> GetAllCasesOfUserAsync(int userId)
+    {
+        if (!await uow.UserRepository.CheckUserExistsByIdAsync(userId))
+        {
+            logger.LogInformation("User with id {UserId} not found", userId);
+            return new NotFound();
+        }
 
-    public async ValueTask<OneOf<Success, NotFound>> ChangeCaseNameAsync(int id, string newName)
+        return new Success<IReadOnlyCollection<Case>>(await uow.CaseRepository.GetAllItemsOfUserAsync(userId));
+    }
+
+    public async ValueTask<OneOf<Success<Case>, NotFound>> ChangeCaseNameAsync(int id, string newName)
     {
         Case? caseItem = await uow.CaseRepository.GetByIdAsync(id, true);
         if (caseItem is null)
@@ -37,38 +44,6 @@ internal sealed class CaseService(IUnitOfWork uow,
         
         logger.LogInformation("Case with id {Id} changed name to {NewName}", id, newName);
         
-        return new Success();
-    }
-
-    public async ValueTask<OneOf<Success<Case>, NotFound>> CreateCaseFromTemplateForUserAsync(
-        int userId, int soundTemplateId)
-    {
-        User? user = await uow.UserRepository.GetUserByIdAsync(userId, true);
-        if (user is null)
-        {
-            logger.LogInformation("User with id {UserId} not found", userId);
-            return new NotFound();
-        }
-        
-        SoundTemplate? soundTemplate = await uow.SoundTemplateRepository.GetByIdAsync(soundTemplateId, true);
-        if (soundTemplate is null)
-        {
-            logger.LogInformation("Sound template with id {SoundTemplateId} not found", soundTemplateId);
-            return new NotFound();
-        }
-        
-        Case caseItem = new()
-        {
-            Name = soundTemplate.Name,
-            Owner = user,
-            Template = soundTemplate
-        };
-        
-        uow.CaseRepository.Add(caseItem);
-        await uow.SaveChangesAsync();
-        
-        logger.LogInformation("Case created for user {UserId} from template {SoundTemplateId}", userId, soundTemplateId);
-        
         return new Success<Case>(caseItem);
     }
 
@@ -81,14 +56,43 @@ internal sealed class CaseService(IUnitOfWork uow,
             return new NotFound();
         }
 
-        IReadOnlyCollection<SoundTemplate> soundTemplates = 
-            await uow.CaseItemRepository.GetSoundTemplatesInCaseTemplateAsync(caseItem.TemplateId);
+        IReadOnlyCollection<ICaseItemRepository.CaseItemSoundTemplate> soundTemplates = 
+            await uow.CaseItemRepository.GetSoundTemplatesInCaseTemplateAsync(caseItem.TemplateId, true);
 
         if (soundTemplates.Count == 0)
         {
+            uow.CaseRepository.Remove(caseItem);
+            await uow.SaveChangesAsync();
+            
+            logger.LogInformation("Case with id {CaseId} opened, but no sound templates found, case removed", caseId);
+            
             return new ICaseService.Empty();
         }
         
-        int weightSum = soundTemplates.Sum(st => st);
+        double weightSum = soundTemplates.Sum(st => st.Weight);
+        double randomValue = Random.Shared.NextDouble() * weightSum;
+
+        double currentWeight = 0;
+        foreach (var soundTemplate in soundTemplates)
+        {
+            currentWeight += soundTemplate.Weight;
+            if (randomValue <= currentWeight)
+            {
+                Sound sound = soundTemplate.Template.ToRandomSound(caseItem.Owner);
+                
+                uow.SoundRepository.Add(sound);
+                uow.CaseRepository.Remove(caseItem);
+                
+                await uow.SaveChangesAsync();
+                
+                logger.LogInformation("Case with id {CaseId} opened, sound {SoundId} created from template {TemplateId}",
+                    caseId, sound.Id, soundTemplate.Template.Id);
+                
+                return new Success<Sound>(sound);
+            }
+        }
+        
+        logger.LogError("No sound template found for case with id {CaseId}, this should never happen", caseId);
+        return new ICaseService.Empty();
     }
 }

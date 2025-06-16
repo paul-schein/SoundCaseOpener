@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using SoundCaseOpener.Persistence.Model;
 
 namespace SoundCaseOpener.Persistence.Repositories;
@@ -15,16 +16,17 @@ internal sealed class ItemRepository<T>(DbSet<T> items) : IItemRepository<T> whe
 {
     private IQueryable<T> Items => items;
     private IQueryable<T> ItemsNoTracking => items.AsNoTracking();
-    
+
     public async ValueTask<IReadOnlyCollection<T>> GetAllItemsOfUserAsync(int userId) =>
-        await ItemsNoTracking
-              .Where(i => i.OwnerId == userId)
-              .Include(i => i.Template)
-              .ToListAsync();
+        await ItemsNoTracking.Where(i => i.OwnerId == userId)
+                             .Include(i => i.Template)
+                             .Include(i => i.Owner)
+                             .ToListAsync();
 
     public async ValueTask<T?> GetByIdAsync(int id, bool tracking = false) => 
         await GetQueryableByTracking(tracking)
               .Include(i => i.Template)
+              .Include(i => i.Owner)
               .FirstOrDefaultAsync(i => i.Id == id);
 
     public void Add(T item)
