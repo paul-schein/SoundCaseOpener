@@ -7,9 +7,11 @@ public interface IUserRepository
 {
     public ValueTask<User?> GetUserByUserNameAsync(string username);
     public ValueTask<User?> GetUserByIdAsync(int id, bool tracking = false);
-    public ValueTask<bool> CheckUserExistsAsync(string username);
+    public ValueTask<bool> CheckUserExistsByUsernameAsync(string username);
+    public ValueTask<bool> CheckUserExistsByIdAsync(int id);
     public ValueTask<Role?> GetUserRoleByIdAsync(int id);
     public void AddUser(User user);
+    public void RemoveUser(User user);
 }
 
 internal sealed class UserRepository(DbSet<User> users) : IUserRepository
@@ -27,8 +29,11 @@ internal sealed class UserRepository(DbSet<User> users) : IUserRepository
             .FirstOrDefaultAsync(u => u.Id == id);
     }
 
-    public async ValueTask<bool> CheckUserExistsAsync(string username) => 
+    public async ValueTask<bool> CheckUserExistsByUsernameAsync(string username) => 
         await UsersNoTracking.AnyAsync(u => u.Username == username);
+
+    public async ValueTask<bool> CheckUserExistsByIdAsync(int id) => 
+        await UsersNoTracking.AnyAsync(u => u.Id == id);
 
     public async ValueTask<Role?> GetUserRoleByIdAsync(int id) => 
         await UsersNoTracking
@@ -40,7 +45,12 @@ internal sealed class UserRepository(DbSet<User> users) : IUserRepository
     {
         users.Add(user);
     }
-    
+
+    public void RemoveUser(User user)
+    {
+        users.Remove(user);
+    }
+
     private IQueryable<User> GetQueryableByTracking(bool tracking) => 
         tracking ? Users : UsersNoTracking;
 }

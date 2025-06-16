@@ -75,6 +75,44 @@ public class UserController(IUserService userService,
             return Problem();
         }
     }
+    
+    [HttpDelete]
+    [Route("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async ValueTask<IActionResult> DeleteUser([FromRoute] int id)
+    {
+        if (id <= 0)
+        {
+            logger.LogInformation("Invalid user id: {Id}", id);
+            return BadRequest("Invalid user id");
+        }
+
+        try
+        {
+            await transaction.BeginTransactionAsync();
+            
+            OneOf<Success, NotFound> result = await userService.DeleteUser(id);
+            return await result.Match<ValueTask<IActionResult>>(
+                async success =>
+                {
+                    await transaction.CommitAsync();
+                    return NoContent();
+                },
+                async notFound =>
+                {
+                    await transaction.RollbackAsync();
+                    return NotFound();
+                });
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(e, "Error while deleting user with id {Id}", id);
+            return Problem();
+        }
+    }
 }
 
 public sealed record UserDto(int Id, string Username, Role Role)

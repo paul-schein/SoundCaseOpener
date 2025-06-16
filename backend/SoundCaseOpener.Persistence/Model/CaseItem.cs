@@ -6,5 +6,5 @@ public class CaseItem
     public int ItemTemplateId { get; set; }
     public required CaseTemplate CaseTemplate { get; set; }
     public required ItemTemplate ItemTemplate { get; set; }
-    public required double Chance { get; set; }
+    public required double Weight { get; set; }
 }
