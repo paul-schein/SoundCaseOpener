@@ -1,10 +1,27 @@
 .drop-zone {
-  border: 2px dashed #888;
+  border: 4px dashed #ccc;
+  border-radius: 1rem;
   padding: 2rem;
   text-align: center;
-  cursor: pointer;
-  transition: background 0.2s;
+  transition: background-color 0.3s ease;
 }
+
 .drop-zone.dragover {
-  background: #e0e7ff;
+  background-color: #ebf8ff; // light blue
+}
+
+.file-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+ul {
+  margin-top: 1.5rem;
+  list-style: disc inside;
+  color: #444;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
