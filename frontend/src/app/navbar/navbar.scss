@@ -1,0 +1,77 @@
+@use '@angular/material' as mat;
+
+.nav-container {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--mat-primary);
+  padding: 1.5rem;
+}
+
+.inner-nav-container {
+  display: flex;
+  gap: 1.5rem;
+  min-width: 5rem;
+  align-items: center;
+}
+
+.inner-nav-container a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.inner-nav-container a:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+h2 {
+  font-size: 1.5rem;
+  color: white;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin: 0 2rem;
+}
+
+button[mat-raised-button] {
+  background: var(--mat-accent);
+  color: #fff;
+  font-weight: 500;
+  border-radius: 4px;
+  padding: 0.5rem 1.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.10);
+  transition: background 0.2s, color 0.2s;
+}
+
+button[mat-raised-button]:hover {
+  background: #fff;
+  color: var(--mat-accent);
+}
+
+@media (max-width: 700px) {
+  .nav-container {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+  .inner-nav-container {
+    gap: 1rem;
+    min-width: unset;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  h2 {
+    font-size: 1.3rem;
+    margin: 0 0 1rem 0;
+  }
+  button[mat-raised-button] {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}

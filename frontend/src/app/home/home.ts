@@ -1,9 +1,11 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {LobbyService} from '../../core/lobby.service';
+import { Component } from '@angular/core';
+import {Navbar} from '../navbar/navbar';
 
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [
+    Navbar
+  ],
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
