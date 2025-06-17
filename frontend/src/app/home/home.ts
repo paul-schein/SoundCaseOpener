@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
+import {LobbyService} from '../../core/lobby.service';
 
 @Component({
   selector: 'app-home',
@@ -6,6 +7,11 @@ import { Component } from '@angular/core';
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
-export class Home {
+export class Home implements OnInit {
+  private readonly lobbyService: LobbyService = inject(LobbyService);
 
+  public async ngOnInit(): Promise<void> {
+    await this.lobbyService.initializeConnection();
+    await this.lobbyService.createLobby('Test Lobby');
+  }
 }

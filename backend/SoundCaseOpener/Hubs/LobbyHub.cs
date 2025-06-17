@@ -114,4 +114,10 @@ public sealed class LobbyHub(ILobbyService lobbyService,
             return false;
         }
     }
+    
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        await LeaveLobbyAsync();
+        await base.OnDisconnectedAsync(exception);
+    }
 }
