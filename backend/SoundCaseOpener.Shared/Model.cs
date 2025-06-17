@@ -15,4 +15,4 @@ public enum Rarity
     Legendary = 20
 }
 
-public sealed record Lobby(int Id, string Name, int UserCount);
+public sealed record Lobby(string Id, string Name, int UserCount);
