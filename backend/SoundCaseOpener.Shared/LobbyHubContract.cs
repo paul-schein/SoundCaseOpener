@@ -20,4 +20,5 @@ public interface ILobbyHubClient
     public Task ReceiveUserJoinedLobbyAsync(string username);
     public Task ReceiveUserLeftLobbyAsync(string username);
     public Task ReceiveUserPlayedSoundAsync(string username, string filePath);
+    public Task ReceiveCaseObtainedAsync(int caseId);
 }

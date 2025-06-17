@@ -15,7 +15,27 @@ public class CaseController(ICaseService caseService,
                             ILogger<CaseController> logger) : BaseController
 {
     [HttpGet]
-    [Route("{userId:int}")]
+    [Route("{id:int}")]
+    [ProducesResponseType<CaseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async ValueTask<ActionResult<CaseDto>> GetCaseByIdAsync([FromRoute] int id)
+    {
+        if (id <= 0)
+        {
+            logger.LogInformation("Invalid case id: {Id}", id);
+            return BadRequest();
+        }
+
+        OneOf<Case, NotFound> result = await caseService.GetCaseByIdAsync(id);
+        
+        return result.Match<ActionResult<CaseDto>>(
+                    success => Ok(CaseDto.FromCase(success)),
+                    notFound => NotFound());
+    }
+    
+    [HttpGet]
+    [Route("user/{userId:int}")]
     [ProducesResponseType<AllCasesOfUserResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

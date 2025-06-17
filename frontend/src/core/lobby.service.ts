@@ -23,8 +23,14 @@ export class LobbyService {
   private readonly userLeftLobbySubject = new Subject<string>();
   private readonly userPlayedSoundSubject =
     new Subject<{ username: string; filePath: string }>();
+  private readonly caseObtainedSubject = new Subject<number>();
 
   public readonly lobbyCreated$ = this.lobbyCreatedSubject.asObservable();
+  public readonly lobbyClosed$ = this.lobbyClosedSubject.asObservable();
+  public readonly userJoinedLobby$ = this.userJoinedLobbySubject.asObservable();
+  public readonly userLeftLobby$ = this.userLeftLobbySubject.asObservable();
+  public readonly userPlayedSound$ = this.userPlayedSoundSubject.asObservable();
+  public readonly caseObtained$ = this.caseObtainedSubject.asObservable();
 
   public async initializeConnection(): Promise<void> {
     if (this.initialized) {
@@ -91,6 +97,9 @@ export class LobbyService {
     });
     this.connection.on('ReceiveUserPlayedSoundAsync', (username: string, filePath: string) => {
       this.userPlayedSoundSubject.next({username, filePath});
+    });
+    this.connection.on('ReceiveCaseObtainedAsync', (caseId: number) => {
+      this.caseObtainedSubject.next(caseId);
     });
   }
 }

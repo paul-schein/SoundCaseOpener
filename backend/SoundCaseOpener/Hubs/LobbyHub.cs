@@ -90,18 +90,30 @@ public sealed class LobbyHub(ILobbyService lobbyService,
         {
             await transaction.BeginTransactionAsync();
             
-            OneOf<Success<(IReadOnlyCollection<string> connections, string username, string filePath)>, 
+            OneOf<Success<ILobbyService.UsersSoundPlayed>,
+                ILobbyService.SuccessCaseObtained,
                 NotFound, ILobbyService.NotAllowed> result = 
                 await lobbyService.PlaySoundAsync(soundId);
             
             return result.Match<bool>(
                 success =>
                 {
-                    Clients.Clients(success.Value.connections)
-                           .ReceiveUserPlayedSoundAsync(success.Value.username, 
-                                                        success.Value.filePath);
+                    Clients.Clients(success.Value.Connections)
+                           .ReceiveUserPlayedSoundAsync(success.Value.Username, 
+                                                        success.Value.FilePath);
                     logger.LogInformation("Sent user played sound event to all other clients for sound {SoundId}", 
                                           soundId);
+                    return true;
+                },
+                successCaseObtained =>
+                {
+                    Clients.Clients(successCaseObtained.UsersSoundPlayed.Connections)
+                           .ReceiveUserPlayedSoundAsync(successCaseObtained.UsersSoundPlayed.Username, 
+                                                        successCaseObtained.UsersSoundPlayed.FilePath);
+                    foreach ((string connectionId, int caseId) in successCaseObtained.UserCases.Connections)
+                    {
+                        Clients.Clients(connectionId).ReceiveCaseObtainedAsync(caseId);
+                    }
                     return true;
                 },
                 notFound => false,

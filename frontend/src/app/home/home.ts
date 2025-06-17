@@ -7,11 +7,6 @@ import {LobbyService} from '../../core/lobby.service';
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
-export class Home implements OnInit {
-  private readonly lobbyService: LobbyService = inject(LobbyService);
+export class Home {
 
-  public async ngOnInit(): Promise<void> {
-    await this.lobbyService.initializeConnection();
-    await this.lobbyService.createLobby('Test Lobby');
-  }
 }

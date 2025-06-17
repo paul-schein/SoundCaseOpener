@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Nito.AsyncEx;
 using OneOf;
 using OneOf.Types;
+using SoundCaseOpener.Core.Logic;
+using SoundCaseOpener.Core.Util;
 using SoundCaseOpener.Persistence.Model;
 using SoundCaseOpener.Persistence.Util;
 using SoundCaseOpener.Shared;
@@ -17,15 +20,26 @@ public interface ILobbyService
         LeaveLobbyAsync(string connectionId);
     public ValueTask<IReadOnlyCollection<Lobby>> GetLobbiesAsync();
     public ValueTask<IReadOnlyCollection<string>> GetUsersInLobbyAsync(string lobbyId);
-    public ValueTask<OneOf<Success<(IReadOnlyCollection<string> connections, 
-            string username, string filePath)>, NotFound, NotAllowed>> 
+    public ValueTask<OneOf<
+            Success<UsersSoundPlayed>, 
+            SuccessCaseObtained,
+            NotFound, NotAllowed>> 
         PlaySoundAsync(int soundId);
     
     public readonly record struct NotAllowed;
+    public readonly record struct SuccessCaseObtained(UsersSoundPlayed UsersSoundPlayed, UserCases UserCases);
+    
+    public sealed record UsersSoundPlayed(
+        IReadOnlyCollection<string> Connections, 
+        string Username, 
+        string FilePath);
+    
+    public sealed record UserCases(IReadOnlyCollection<(string connectionId, int caseId)> Connections);
 }
 
 public class LobbyService(IServiceScopeFactory scopeFactory, 
                           IClock clock,
+                          IOptions<Settings> settings,
                           ILogger<LobbyService> logger) : ILobbyService
 {
     private readonly Dictionary<string, Lobby> _lobbies = [];
@@ -169,10 +183,12 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
         }
     }
 
-    public async ValueTask<OneOf<Success<(IReadOnlyCollection<string> connections, string username, string filePath)>, 
-        NotFound, ILobbyService.NotAllowed>> PlaySoundAsync(int soundId)
+    public async ValueTask<OneOf<Success<ILobbyService.UsersSoundPlayed>, 
+            ILobbyService.SuccessCaseObtained,
+            NotFound, ILobbyService.NotAllowed>> PlaySoundAsync(int soundId)
     {
-        Sound? sound = await GetUnitOfWork().SoundRepository.GetByIdAsync(soundId, true);
+        IUnitOfWork uow = GetUnitOfWork();
+        Sound? sound = await uow.SoundRepository.GetByIdAsync(soundId, true);
         if (sound is null)
         {
             logger.LogWarning("Sound with id {SoundId} not found", soundId);
@@ -196,16 +212,45 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
             }
             
             sound.LastTimeUsed = clock.GetCurrentInstant();
-            await GetUnitOfWork().SaveChangesAsync();
             
             logger.LogInformation("Sound with id {SoundId} played in lobby {LobbyId}", soundId, lobbyId);
+
+            ILobbyService.UsersSoundPlayed usersSoundPlayed
+                = new(GetConnectionIdsOfLobby(lobbyId),
+                      sound.Owner.Username, ((SoundTemplate) sound.Template).SoundFile.FilePath);
             
-            return new Success<(IReadOnlyCollection<string> connections, string username, string filePath)>(
-             (GetConnectionIdsOfLobby(lobbyId).Select(u => _connections[u]).ToList(), 
-              sound.Owner.Username, ((SoundTemplate)sound.Template).SoundFile.FilePath));
+            if (Logic.Util.TryHitChance(settings.Value.RandomCaseChance))
+            {
+                return new ILobbyService.SuccessCaseObtained(usersSoundPlayed,
+                    await CreateCasesForUsers(
+                    (await uow.CaseTemplateRepository.GetAllAsync(true)).ToList().GetRandomElement(),
+                        await uow.UserRepository.GetUsersByUsernameAsync(_lobbyUsers[lobbyId]),
+                    uow));
+            }
+
+            await uow.SaveChangesAsync();
+            return new Success<ILobbyService.UsersSoundPlayed>(usersSoundPlayed);
         }
     }
 
+    private async ValueTask<ILobbyService.UserCases> CreateCasesForUsers(CaseTemplate template,
+                                                        IReadOnlyCollection<User> users, 
+                                                        IUnitOfWork uow)
+    {
+        List<Case> cases = [];
+        foreach (User user in users)
+        {
+            Case caseItem = template.ToCase(user);
+            uow.CaseRepository.Add(caseItem);
+            cases.Add(caseItem);
+        }
+
+        await uow.SaveChangesAsync();
+
+        return new ILobbyService.UserCases(cases.Select(c => 
+                                                            (_connections[c.Owner.Username], c.Id)).ToList());
+    }
+    
     private IReadOnlyCollection<string> GetConnectionIdsOfLobby(string lobbyId)
     {
         using (_lobbiesLock.ReaderLock())

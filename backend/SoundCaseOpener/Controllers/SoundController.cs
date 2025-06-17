@@ -15,7 +15,7 @@ public class SoundController(ISoundService soundService,
                              ILogger<SoundController> logger) : BaseController
 {
     [HttpGet]
-    [Route("{userId:int}")]
+    [Route("user/{userId:int}")]
     [ProducesResponseType<AllSoundsOfUserResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -9,6 +9,7 @@ namespace SoundCaseOpener.Core.Services;
 
 public interface ICaseService
 {
+    public ValueTask<OneOf<Case, NotFound>> GetCaseByIdAsync(int caseId);
     public ValueTask<OneOf<Success<IReadOnlyCollection<Case>>, NotFound>> GetAllCasesOfUserAsync(int userId);
     public ValueTask<OneOf<Success<Case>, NotFound>> ChangeCaseNameAsync(int id, string newName);
     public ValueTask<OneOf<Success<Sound>, Empty, NotFound>> OpenCaseAsync(int caseId);
@@ -19,6 +20,18 @@ public interface ICaseService
 internal sealed class CaseService(IUnitOfWork uow,
                                   ILogger<CaseService> logger) : ICaseService
 {
+    public async ValueTask<OneOf<Case, NotFound>> GetCaseByIdAsync(int caseId)
+    {
+        Case? caseItem = await uow.CaseRepository.GetByIdAsync(caseId);
+        if (caseItem is null)
+        {
+            logger.LogInformation("Case with id {Id} not found", caseId);
+            return new NotFound();
+        }
+
+        return caseItem;
+    }
+
     public async ValueTask<OneOf<Success<IReadOnlyCollection<Case>>, NotFound>> GetAllCasesOfUserAsync(int userId)
     {
         if (!await uow.UserRepository.CheckUserExistsByIdAsync(userId))

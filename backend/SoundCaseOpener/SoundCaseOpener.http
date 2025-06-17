@@ -108,23 +108,26 @@ GET {{Host}}/api/users/username/tsolmonbat
 
 
 ### Get all Cases of User
-GET {{Host}}/api/cases/{{userId}}
+GET {{Host}}/api/cases/user/{{userId}}
 
 > {% 
     client.global.set("caseId", response.body.cases[0].id)
 %}
 
+### Get Case by ID
+GET {{Host}}/api/cases/{{caseId}}
+
 ### Get all Sounds of User
-GET {{Host}}/api/sounds/{{userId}}
+GET {{Host}}/api/sounds/user/{{userId}}
 
 ### Open Case by ID
 POST {{Host}}/api/cases/{{caseId}}/open
 
 ### Get all Cases of User again
-GET {{Host}}/api/cases/{{userId}}
+GET {{Host}}/api/cases/user/{{userId}}
 
-### Get all Cases of User again
-GET {{Host}}/api/sounds/{{userId}}
+### Get all Sounds of User again
+GET {{Host}}/api/sounds/user/{{userId}}
 
 > {% 
     client.global.set("soundId", response.body.sounds[0].id)
