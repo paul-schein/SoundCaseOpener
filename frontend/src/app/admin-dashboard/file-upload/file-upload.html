@@ -1,6 +1,6 @@
 <div
   class="drop-zone"
-  [class.dragover]="isDragOver"
+  [class.dragover]="isDragOver()"
   (dragover)="onDragOver($event)"
   (dragleave)="onDragLeave($event)"
   (drop)="onDrop($event)"
@@ -12,8 +12,10 @@
 <div class="file-actions">
   @if (files().length > 0) {
     <button matButton="tonal" type="button" (click)="clearFiles()">Clear Files</button>
+    <button matButton="tonal" type="button" (click)="pushFiles()">Add to Sound-file List</button>
   } @else {
-    <button matButton="tonal" disabled type="button" (click)="clearFiles()">Clear Files</button>
+    <button matButton="tonal" disabled type="button">Clear Files</button>
+    <button matButton="tonal" disabled type="button">Add to Sound-file List</button>
   }
 </div>
 
