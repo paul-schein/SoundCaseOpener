@@ -1,15 +1,21 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import {provideRouter, withComponentInputBinding} from '@angular/router';
+import { ApplicationConfig, inject,
+  provideAppInitializer, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 
 import { routes } from './app.routes';
-import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {provideHttpClient} from '@angular/common/http';
+import {ConfigService} from '../core/config.service';
+
+function loadAppConfig(configService: ConfigService): () => Promise<void> {
+  return async () => await configService.loadConfig();
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient()
+    provideHttpClient(),
+    provideAppInitializer(() => loadAppConfig(inject(ConfigService))())
   ]
 };

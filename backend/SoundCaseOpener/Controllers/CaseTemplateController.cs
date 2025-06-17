@@ -4,6 +4,7 @@ using OneOf;
 using OneOf.Types;
 using SoundCaseOpener.Core.Services;
 using SoundCaseOpener.Persistence.Model;
+using SoundCaseOpener.Persistence.Repositories;
 using SoundCaseOpener.Persistence.Util;
 using SoundCaseOpener.Shared;
 using SoundCaseOpener.Util;
@@ -174,9 +175,9 @@ public class CaseTemplateController(ICaseTemplateService caseTemplateService,
     
     [HttpGet]
     [Route("{id:int}/sound-templates")]
-    [ProducesResponseType<AllSoundTemplatesResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<AllSoundTemplateCaseItemsResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async ValueTask<ActionResult<AllSoundTemplatesResponse>> GetSoundTemplatesByCaseTemplateIdAsync(
+    public async ValueTask<ActionResult<AllSoundTemplateCaseItemsResponse>> GetSoundTemplatesInCaseTemplateByIdAsync(
         [FromRoute] int id)
     {
         if (id <= 0)
@@ -185,13 +186,13 @@ public class CaseTemplateController(ICaseTemplateService caseTemplateService,
             return BadRequest("Invalid case template id");
         }
 
-        OneOf<Success<IReadOnlyCollection<SoundTemplate>>, NotFound> result = 
+        OneOf<Success<IReadOnlyCollection<ICaseItemRepository.CaseItemSoundTemplate>>, NotFound> result = 
             await caseTemplateService.GetAllSoundTemplatesInCaseTemplateAsync(id);
 
-        return result.Match<ActionResult<AllSoundTemplatesResponse>>(
-                            success => Ok(new AllSoundTemplatesResponse(
-                                                success.Value.Select(SoundTemplateDto.FromSoundTemplate).ToList())),
-                            notFound => NotFound("Case template not found"));;
+        return result.Match<ActionResult<AllSoundTemplateCaseItemsResponse>>(
+                                        success => Ok(new AllSoundTemplateCaseItemsResponse(
+                                        success.Value.Select(SoundTemplateCaseItemDto.FromSoundTemplate).ToList())),
+                                        notFound => NotFound("Case template not found"));;
     }
     
     [HttpDelete]
@@ -231,6 +232,28 @@ public class CaseTemplateController(ICaseTemplateService caseTemplateService,
         }
     }
     
+}
+
+public sealed record AllSoundTemplateCaseItemsResponse(IReadOnlyCollection<SoundTemplateCaseItemDto> SoundTemplates);
+
+public sealed record SoundTemplateCaseItemDto(int Id, 
+                                              string Name, 
+                                              string Description, 
+                                              Rarity Rarity,
+                                              int MinCooldown,
+                                              int MaxCooldown,
+                                              int SoundFileId,
+                                              double Weight)
+{
+    public static SoundTemplateCaseItemDto FromSoundTemplate(ICaseItemRepository.CaseItemSoundTemplate soundTemplate) =>
+        new(soundTemplate.Template.Id, 
+            soundTemplate.Template.Name,
+            soundTemplate.Template.Description,
+            soundTemplate.Template.Rarity,
+            soundTemplate.Template.MinCooldown,
+            soundTemplate.Template.MaxCooldown,
+            soundTemplate.Template.SoundFileId,
+            soundTemplate.Weight);
 }
 
 public sealed record AddItemTemplateToCaseTemplateRequest(int CaseTemplateId, int ItemTemplateId, double Weight)

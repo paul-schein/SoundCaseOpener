@@ -1,7 +1,9 @@
 ﻿using OneOf;
 using OneOf.Types;
 using SoundCaseOpener.Persistence.Model;
+using SoundCaseOpener.Persistence.Repositories;
 using SoundCaseOpener.Persistence.Util;
+using SoundCaseOpener.Shared;
 
 namespace SoundCaseOpener.Core.Services;
 
@@ -16,12 +18,12 @@ public interface ICaseTemplateService
     public ValueTask<OneOf<Success, Conflict, NotFound>> AddItemTemplateToCaseTemplateAsync(
         int caseTemplateId,
         int itemTemplateId,
-        double chance);
+        double weight);
     public ValueTask<OneOf<Success, NotFound>> RemoveItemTemplateFromCaseTemplateAsync(
         int caseTemplateId,
         int itemTemplateId);
-    public ValueTask<OneOf<Success<IReadOnlyCollection<SoundTemplate>>, NotFound>> GetAllSoundTemplatesInCaseTemplateAsync(
-        int caseTemplateId);
+    public ValueTask<OneOf<Success<IReadOnlyCollection<ICaseItemRepository.CaseItemSoundTemplate>>, NotFound>> 
+        GetAllSoundTemplatesInCaseTemplateAsync(int caseTemplateId);
     public ValueTask<OneOf<Success, NotFound>> DeleteAsync(int id);
     
     public readonly record struct Conflict;
@@ -66,7 +68,7 @@ internal sealed class CaseTemplateService(IUnitOfWork uow,
     }
 
     public async ValueTask<OneOf<Success, ICaseTemplateService.Conflict, NotFound>> AddItemTemplateToCaseTemplateAsync(
-        int caseTemplateId, int itemTemplateId, double chance)
+        int caseTemplateId, int itemTemplateId, double weight)
     {
         if (await uow.CaseItemRepository.CheckIfCaseItemExistsAsync(caseTemplateId, itemTemplateId))
         {
@@ -91,13 +93,13 @@ internal sealed class CaseTemplateService(IUnitOfWork uow,
         {
             CaseTemplate = caseTemplate,
             ItemTemplate = itemTemplate,
-            Chance = chance
+            Weight = weight
         };
         uow.CaseItemRepository.Add(caseItem);
         await uow.SaveChangesAsync();
         
         logger.LogInformation("Item template with id {ItemTemplateId} added to case template with id {CaseTemplateId} with chance {Chance}",
-                              itemTemplateId, caseTemplateId, chance);
+                              itemTemplateId, caseTemplateId, weight);
         
         return new Success();
     }
@@ -122,15 +124,15 @@ internal sealed class CaseTemplateService(IUnitOfWork uow,
         return new Success();
     }
 
-    public async ValueTask<OneOf<Success<IReadOnlyCollection<SoundTemplate>>, NotFound>> GetAllSoundTemplatesInCaseTemplateAsync(
-        int caseTemplateId)
+    public async ValueTask<OneOf<Success<IReadOnlyCollection<ICaseItemRepository.CaseItemSoundTemplate>>, NotFound>> 
+        GetAllSoundTemplatesInCaseTemplateAsync(int caseTemplateId)
     {
         if (!await uow.CaseTemplateRepository.CheckIfExists(caseTemplateId))
         {
             return new NotFound();
         }
         
-        return new Success<IReadOnlyCollection<SoundTemplate>>(
+        return new Success<IReadOnlyCollection<ICaseItemRepository.CaseItemSoundTemplate>>(
                                 await uow.CaseItemRepository.GetSoundTemplatesInCaseTemplateAsync(caseTemplateId));
     }
     

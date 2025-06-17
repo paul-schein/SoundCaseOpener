@@ -5,6 +5,7 @@ using SoundCaseOpener.Shared;
 using SoundCaseOpener.Util;
 using Microsoft.AspNetCore.Mvc;
 using NodaTime.Serialization.SystemTextJson;
+using SoundCaseOpener.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,7 @@ var settings = builder.Services.LoadAndConfigureSettings(configurationManager);
 builder.AddLogging();
 builder.Services.AddApplicationServices(configurationManager, isDev);
 builder.Services.AddOpenApi();
+builder.Services.AddSignalR();
 builder.Services.AddCors(settings);
 builder.Services.AddControllers(o => { o.ModelBinderProviders.Insert(0, new NodaTimeModelBinderProvider()); })
        .AddJsonOptions(o => ConfigureJsonSerialization(o, isDev));
@@ -27,6 +29,7 @@ var app = builder.Build();
 app.UseCors(Setup.CorsPolicyName);
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.MapControllers();
+app.MapHub<LobbyHub>(ILobbyHub.Route).RequireCors(Setup.CorsPolicyName);
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

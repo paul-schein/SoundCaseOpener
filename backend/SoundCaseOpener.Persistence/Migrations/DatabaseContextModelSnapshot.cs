@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SoundCaseOpener.Persistence.Util;
 
@@ -36,9 +37,9 @@ namespace SoundCaseOpener.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("item_template_id");
 
-                    b.Property<double>("Chance")
+                    b.Property<double>("Weight")
                         .HasColumnType("double precision")
-                        .HasColumnName("chance");
+                        .HasColumnName("weight");
 
                     b.HasKey("CaseTemplateId", "ItemTemplateId")
                         .HasName("pk_case_item");
@@ -181,6 +182,10 @@ namespace SoundCaseOpener.Persistence.Migrations
                     b.Property<int>("Cooldown")
                         .HasColumnType("integer")
                         .HasColumnName("cooldown");
+
+                    b.Property<Instant?>("LastTimeUsed")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_time_used");
 
                     b.ToTable("sounds", "SoundCaseOpener");
                 });

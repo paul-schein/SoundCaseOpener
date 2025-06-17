@@ -1,27 +1,5 @@
 @Host = http://localhost:5101
 
-### Add User
-POST {{Host}}/api/users
-Content-Type: application/json
-
-{
-  "username": "tsolmonbat"
-}
-
-> {% 
-    client.global.set("userId", response.body.id) 
-%}
-
-### Get User by ID
-GET {{Host}}/api/users/1
-
-### Get User by Username
-GET {{Host}}/api/users/username/tsolmonbat
-
-> {%
-    client.global.set("userId", response.body.id)
-%}
-
 ### Get all Sound Files
 GET {{Host}}/api/sound-files
 
@@ -107,6 +85,62 @@ Content-Type: application/json
 
 ### Get all Sound Templates in a Case Template again
 GET {{Host}}/api/case-templates/{{caseTemplateId}}/sound-templates
+
+
+
+### Add User
+POST {{Host}}/api/users
+Content-Type: application/json
+
+{
+    "username": "tsolmonbat"
+}
+
+> {%
+    client.global.set("userId", response.body.id)
+%}
+
+### Get User by ID
+GET {{Host}}/api/users/{{userId}}
+
+### Get User by Username
+GET {{Host}}/api/users/username/tsolmonbat
+
+
+### Get all Cases of User
+GET {{Host}}/api/cases/user/{{userId}}
+
+> {% 
+    client.global.set("caseId", response.body.cases[0].id)
+%}
+
+### Get Case by ID
+GET {{Host}}/api/cases/{{caseId}}
+
+### Get all Sounds of User
+GET {{Host}}/api/sounds/user/{{userId}}
+
+### Open Case by ID
+POST {{Host}}/api/cases/{{caseId}}/open
+
+### Get all Cases of User again
+GET {{Host}}/api/cases/user/{{userId}}
+
+### Get all Sounds of User again
+GET {{Host}}/api/sounds/user/{{userId}}
+
+> {% 
+    client.global.set("soundId", response.body.sounds[0].id)
+%}
+
+### Patch Sound by ID
+PATCH {{Host}}/api/sounds/{{soundId}}/name/testSoundName
+
+
+### Delete User by ID
+DELETE {{Host}}/api/users/{{userId}}
+
+
 
 ###
 DELETE {{Host}}/api/case-templates/{{caseTemplateId}}/item-template/{{soundTemplateId}}

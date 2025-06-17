@@ -5,7 +5,7 @@ namespace SoundCaseOpener.Persistence.Repositories;
 
 public interface ITemplateRepository<T> where T : ItemTemplate
 {
-    public ValueTask<IReadOnlyCollection<T>> GetAllAsync();
+    public ValueTask<IReadOnlyCollection<T>> GetAllAsync(bool tracking = false);
     public ValueTask<T?> GetByIdAsync(int id, bool tracking = false);
     public void Add(T itemTemplate);
     public void Remove(T itemTemplate);
@@ -17,8 +17,8 @@ internal sealed class TemplateRepository<T>(DbSet<T> templates) : ITemplateRepos
     private IQueryable<T> Templates => templates;
     private IQueryable<T> TemplatesNoTracking => templates.AsNoTracking();
 
-    public async ValueTask<IReadOnlyCollection<T>> GetAllAsync() => 
-        await TemplatesNoTracking.ToListAsync();
+    public async ValueTask<IReadOnlyCollection<T>> GetAllAsync(bool tracking) => 
+        await GetQueryableByTracking(tracking).ToListAsync();
 
     public async ValueTask<T?> GetByIdAsync(int id, bool tracking = false) => 
         await GetQueryableByTracking(tracking)
