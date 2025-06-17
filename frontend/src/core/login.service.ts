@@ -19,6 +19,7 @@ export class LoginService {
       let res = await firstValueFrom(this.http.get(url, {observe: 'response'}));
 
       const user = userZod.parse(res.body);
+      sessionStorage.setItem('user', JSON.stringify(user));
       this._currentUser = user;
       return user;
     } catch (error) {
@@ -35,6 +36,7 @@ export class LoginService {
       const res = await firstValueFrom(this.http.post(url, {username: username}, {observe: 'response'}));
 
       const user = userZod.parse(res.body);
+      sessionStorage.setItem('user', JSON.stringify(user));
       this._currentUser = user;
       return user;
     } catch (error) {

@@ -1,0 +1,18 @@
+@if (isLoading()) {
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+}
+@else {
+  <div class="mb-5">
+    <button mat-flat-button (click)="handleCreateLobby()">Create Lobby</button>
+  </div>
+  @if (noLobbies()) {
+    <p>There are no lobbies available! 😢</p>
+  }
+  @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (lobby of lobbies(); track $index) {
+        <app-lobby-card [lobby]="lobby"></app-lobby-card>
+      }
+    </div>
+  }
+}

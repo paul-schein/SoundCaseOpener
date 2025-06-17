@@ -31,8 +31,7 @@ export class Login {
       const usr= this.formGroup.get('username')?.value;
       let res = await this.loginService.getUserByUsername(usr);
       if(res == null){
-        let added = await this.loginService.addUserByUsername(usr);
-        sessionStorage.setItem('user', JSON.stringify(added));
+        res = await this.loginService.addUserByUsername(usr);
       }
       await this.router.navigate(['']);
     }catch(err){
