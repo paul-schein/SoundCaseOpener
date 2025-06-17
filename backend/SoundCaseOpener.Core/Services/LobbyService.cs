@@ -199,7 +199,7 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
             && sound.LastTimeUsed.Value.Plus(Duration.FromSeconds(sound.Cooldown)) 
             > clock.GetCurrentInstant())
         {
-            logger.LogWarning("Sound with id {SoundId} is on cooldown", soundId);
+            logger.LogInformation("Sound with id {SoundId} is on cooldown", soundId);
             return new ILobbyService.NotAllowed();
         }
         
