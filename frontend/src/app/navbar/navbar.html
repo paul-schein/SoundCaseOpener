@@ -1,0 +1,13 @@
+<nav class="nav-container">
+ <div class="inner-nav-container">
+   <a [routerLink]="'/home'">Home</a>
+   @if(isAdmin){
+     <a [routerLink]="'/admin-dashboard'">Manage System</a>
+   }
+   <a [routerLink]="'/lobby'">Lobby</a>
+ </div>
+  <h2>SoundCaseOpener</h2>
+  <button mat-raised-button>Logout</button>
+</nav>
+
+
