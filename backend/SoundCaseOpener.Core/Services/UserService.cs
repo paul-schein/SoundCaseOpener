@@ -5,6 +5,8 @@ using SoundCaseOpener.Core.Logic;
 using SoundCaseOpener.Core.Util;
 using SoundCaseOpener.Persistence.Model;
 using SoundCaseOpener.Persistence.Util;
+using SoundCaseOpener.Shared;
+using User = SoundCaseOpener.Persistence.Model.User;
 
 namespace SoundCaseOpener.Core.Services;
 
@@ -114,7 +116,7 @@ internal sealed class UserService(IUnitOfWork uow,
         
         for (int i = 0; i < settings.Value.StarterCasesAmount; i++)
         {
-            CaseTemplate template = templates[Random.Shared.Next(0, templates.Count)];
+            CaseTemplate template = templates.GetRandomElement();
             uow.CaseRepository.Add(template.ToCase(user));
         }
         

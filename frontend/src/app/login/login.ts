@@ -33,10 +33,8 @@ export class Login {
       if(res == null){
         let added = await this.loginService.addUserByUsername(usr);
         sessionStorage.setItem('user', JSON.stringify(added));
-        await this.router.navigate(['']);
       }
-
-
+      await this.router.navigate(['']);
     }catch(err){
       console.error(err);
     }

@@ -4,6 +4,16 @@ namespace SoundCaseOpener.Core.Logic;
 
 public static class ExtensionMethods
 {
+    public static T GetRandomElement<T>(this List<T> source)
+    {
+        if (!source.Any())
+        {
+            throw new InvalidOperationException("Cannot get a random element from an empty collection.");
+        }
+
+        return source[Random.Shared.Next(0, source.Count)];
+    }
+    
     public static Sound ToRandomSound(this SoundTemplate template, User user) =>
         new()
         {

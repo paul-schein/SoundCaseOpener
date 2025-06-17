@@ -3,6 +3,7 @@ using OneOf.Types;
 using SoundCaseOpener.Persistence.Model;
 using SoundCaseOpener.Persistence.Repositories;
 using SoundCaseOpener.Persistence.Util;
+using SoundCaseOpener.Shared;
 
 namespace SoundCaseOpener.Core.Services;
 
