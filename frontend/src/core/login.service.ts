@@ -45,6 +45,11 @@ export class LoginService {
   public get currentUser(): User | null {
     return this._currentUser;
   }
+
+  public logout(): void{
+    sessionStorage.removeItem('user');
+    this._currentUser = null;
+  }
 }
 
 
