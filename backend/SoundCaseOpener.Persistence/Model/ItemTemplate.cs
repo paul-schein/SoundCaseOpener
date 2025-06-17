@@ -1,4 +1,6 @@
-﻿namespace SoundCaseOpener.Persistence.Model;
+﻿using SoundCaseOpener.Shared;
+
+namespace SoundCaseOpener.Persistence.Model;
 
 public class ItemTemplate
 {

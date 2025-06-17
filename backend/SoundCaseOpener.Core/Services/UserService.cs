@@ -5,6 +5,8 @@ using SoundCaseOpener.Core.Logic;
 using SoundCaseOpener.Core.Util;
 using SoundCaseOpener.Persistence.Model;
 using SoundCaseOpener.Persistence.Util;
+using SoundCaseOpener.Shared;
+using User = SoundCaseOpener.Persistence.Model.User;
 
 namespace SoundCaseOpener.Core.Services;
 

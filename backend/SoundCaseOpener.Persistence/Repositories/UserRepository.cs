@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SoundCaseOpener.Persistence.Model;
+using SoundCaseOpener.Shared;
+using User = SoundCaseOpener.Persistence.Model.User;
 
 namespace SoundCaseOpener.Persistence.Repositories;
 
