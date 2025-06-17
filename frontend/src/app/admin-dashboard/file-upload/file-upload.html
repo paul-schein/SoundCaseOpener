@@ -1,0 +1,24 @@
+<div
+  class="drop-zone"
+  [class.dragover]="isDragOver"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
+>
+  <p>Drag & drop files here</p>
+  <input type="file" (change)="onFileSelected($event)" multiple hidden #fileInput>
+</div>
+<button matButton="tonal" type="button" (click)="fileInput.click()">Choose Files</button>
+<div class="file-actions">
+  @if (files().length > 0) {
+    <button matButton="tonal" type="button" (click)="clearFiles()">Clear Files</button>
+  } @else {
+    <button matButton="tonal" disabled type="button" (click)="clearFiles()">Clear Files</button>
+  }
+</div>
+
+<ul>
+  @for (file of files(); track file.name) {
+    <li>{{ file.name }}</li>
+  }
+</ul>
