@@ -12,7 +12,7 @@ export class SnackbarService {
     this.snackbar.open(message, "Close", {
       duration: duration.toMillis(),
       horizontalPosition: "center",
-      verticalPosition: "top"
+      verticalPosition: "bottom"
     });
   }
 }

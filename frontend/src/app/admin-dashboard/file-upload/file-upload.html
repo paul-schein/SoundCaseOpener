@@ -20,9 +20,8 @@
     <button mat-button disabled type="button">Add to Sound-file List</button>
   }
 </div>
-<div class="list">
+<div class="list flex flex-col justify-center">
     @for (file of files(); track file.name) {
-      <p>{{ file.name }}</p>
+      <p class="text-center">{{ file.name }}</p>
     }
 </div>
-

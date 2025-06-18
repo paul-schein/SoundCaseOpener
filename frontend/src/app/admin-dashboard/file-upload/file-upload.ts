@@ -1,6 +1,7 @@
 import {Component, inject, signal, WritableSignal} from '@angular/core';
 import {MatButton} from '@angular/material/button';
 import {SoundFileService} from '../../../core/services/sound-file-service';
+import {SnackbarService} from '../../../core/services/snackbar-service';
 
 @Component({
   selector: 'app-file-upload',
@@ -12,6 +13,7 @@ import {SoundFileService} from '../../../core/services/sound-file-service';
 })
 export class FileUpload {
   protected soundFileService: SoundFileService = inject(SoundFileService);
+  protected snackBarService: SnackbarService = inject(SnackbarService);
   protected files: WritableSignal<File[]> = signal([]);
   protected isDragOver: WritableSignal<boolean> = signal(false);
 
@@ -47,6 +49,7 @@ export class FileUpload {
   public async pushFiles() {
     await this.soundFileService.uploadFiles(this.files());
     this.clearFiles();
+    this.snackBarService.show("Files successfully uploaded!")
   }
 
   private addFiles(fileList: FileList) {
