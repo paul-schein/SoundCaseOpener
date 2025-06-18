@@ -1,5 +1,5 @@
 import {Component, inject} from '@angular/core';
-import {LobbyService} from '../../../../core/lobby.service';
+import {LobbyService} from '../../../../core/services/lobby-service';
 import {SoundPlayButton} from './sound-play-button/sound-play-button';
 
 @Component({

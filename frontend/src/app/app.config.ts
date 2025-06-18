@@ -3,7 +3,7 @@ import { ApplicationConfig, inject,
 import {provideRouter, withComponentInputBinding} from '@angular/router';
 import { routes } from './app.routes';
 import {provideHttpClient} from '@angular/common/http';
-import {ConfigService} from '../core/config.service';
+import {ConfigService} from '../core/services/config-service';
 
 function loadAppConfig(configService: ConfigService): () => Promise<void> {
   return async () => await configService.loadConfig();
