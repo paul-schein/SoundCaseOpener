@@ -1,0 +1,37 @@
+@if (isLoading()) {
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+}
+@else {
+  <div class="m-3">
+    <div class="flex flex-row justify-between">
+      <div class="mb-5 flex flex-row gap-x-5">
+        <button mat-flat-button (click)="handleCreateLobby()" [disabled]="createBtnDisabled()">Create Lobby</button>
+        <mat-form-field>
+          <mat-label>
+            New Lobby Name
+          </mat-label>
+          <input matInput [(ngModel)]="newLobbyName" />
+        </mat-form-field>
+      </div>
+      <div class="flex flex-row items-center gap-x-5">
+        <span class="text-lg">Filter:</span>
+        <mat-form-field>
+          <mat-label>
+            Filter
+          </mat-label>
+          <input matInput [(ngModel)]="filter" />
+        </mat-form-field>
+      </div>
+    </div>
+    @if (noLobbies()) {
+      <p>There are no lobbies available! 😢</p>
+    }
+    @else {
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (lobby of this.filteredLobbies(); track $index) {
+          <app-lobby-card [lobby]="lobby" [routerLink]="['/lobby', lobby.id]"></app-lobby-card>
+        }
+      </div>
+    }
+  </div>
+}
