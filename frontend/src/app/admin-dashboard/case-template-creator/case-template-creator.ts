@@ -7,6 +7,8 @@ import {MatButton} from '@angular/material/button';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {SnackbarService} from '../../../core/services/snackbar-service';
+import {ConfigService} from '../../../core/config.service';
+import {CaseTemplateService, NewCaseTemplate} from '../../../core/services/case-template-service';
 
 @Component({
   selector: 'app-case-template-creator',
@@ -25,14 +27,15 @@ import {SnackbarService} from '../../../core/services/snackbar-service';
   styleUrl: './case-template-creator.scss'
 })
 export class CaseTemplateCreator implements OnInit {
+  protected configService: ConfigService = inject(ConfigService);
   protected snackbarService: SnackbarService = inject(SnackbarService);
-  protected readonly Rarity = Rarity;
+  protected caseTemplateService: CaseTemplateService = inject(CaseTemplateService);
   protected readonly RaritySchema = RaritySchema;
-  protected rarityOptions: {name: string, value: number}[] = [];
+  protected rarityOptions: {name: string, value: string}[] = [];
   private readonly formBuilder: FormBuilder = inject(FormBuilder);
   protected readonly formGroup = this.formBuilder.group({
-    name: ['', [Validators.required, Validators.minLength(4)]],
-    description: ['', [Validators.required, Validators.maxLength(200)]],
+    name: ['', [Validators.required, Validators.minLength(this.configService.config.nameMinLength)]],
+    description: ['', [Validators.required, Validators.maxLength(this.configService.config.descriptionMaxLength)]],
     rarity: ['', [Validators.required]],
   });
 
@@ -43,16 +46,32 @@ export class CaseTemplateCreator implements OnInit {
   });
 
   ngOnInit() {
-    this.rarityOptions = Object.keys(Rarity)
-      .filter(key => isNaN(Number(key)))
-      .map(key => ({
-        name: key,
-        value: Rarity[key as keyof typeof Rarity]
-      }));
+    this.rarityOptions = Object.values(RaritySchema.enum).map(value => ({
+      name: value,
+      value: value
+    }));
   }
 
-  public addCaseTemplate() {
+  public async addCaseTemplate() {
+    if (!this.formGroup.valid) {
+      this.snackbarService.show("Please fill all required fields correctly");
+      return;
+    }
 
-    this.snackbarService.show("Case Template successfully added");
-  }
+    const formValues = this.formGroup.value;
+
+    const newCaseTemplate: NewCaseTemplate = {
+      name: formValues.name as string,
+      description: formValues.description as string,
+      rarity: formValues.rarity as unknown as Rarity
+    };
+
+    const result = await this.caseTemplateService.addCaseTemplate(newCaseTemplate);
+
+    if (result) {
+      this.snackbarService.show("Case Template successfully added");
+      this.formGroup.reset();
+    } else {
+      this.snackbarService.show("There was an error trying to add a Case Template");
+    }  }
 }

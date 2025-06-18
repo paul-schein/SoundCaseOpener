@@ -8,10 +8,6 @@ export abstract class ServiceBase {
 
   protected abstract get controller(): string;
 
-  protected isSuccessStatusCode(response: { status: number }): boolean {
-    return response.status >= 200 && response.status < 300;
-  }
-
   protected buildUrl(action: string | null, ...queryParams: ((QueryParam | null) | undefined)[]): string {
     let url = `${ServiceBase.baseUrl}/${this.controller}`;
     if (action) {
