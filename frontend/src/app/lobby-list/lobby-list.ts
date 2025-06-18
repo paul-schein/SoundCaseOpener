@@ -4,14 +4,15 @@ import {Subscription} from 'rxjs';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {LobbyCard} from './lobby-card/lobby-card';
 import {MatButton} from '@angular/material/button';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-lobby-list',
   imports: [
     MatProgressBar,
     LobbyCard,
-    MatButton
+    MatButton,
+    RouterLink
   ],
   templateUrl: './lobby-list.html',
   styleUrl: './lobby-list.scss'
@@ -40,13 +41,23 @@ export class LobbyList implements OnInit, OnDestroy {
   public async ngOnInit(): Promise<void> {
     await this.lobbyService.initializeConnection();
     this.lobbies.set(await this.lobbyService.getLobbies());
-    this.subscriptions.push(this.lobbyService.lobbyCreated$.subscribe(lobby => {
-      this.lobbies.update(lobbies => [...lobbies, lobby]);
-    }));
-    this.subscriptions.push(this.lobbyService.lobbyClosed$.subscribe(lobbyId => {
-      this.lobbies.update(lobbies =>
-        lobbies.filter(lobby => lobby.id !== lobbyId));
-    }));
+    this.subscriptions.push(
+      this.lobbyService.lobbyCreated$.subscribe(lobby => {
+        this.lobbies.update(lobbies => [...lobbies, lobby]);
+      }),
+      this.lobbyService.lobbyClosed$.subscribe(lobbyId => {
+        this.lobbies.update(lobbies =>
+          lobbies.filter(lobby => lobby.id !== lobbyId));
+      }),
+      this.lobbyService.lobbyUserCountChange$.subscribe(change => {
+        this.lobbies.update(lobbies =>
+          lobbies.map(lobby => {
+            if (lobby.id === change.lobbyId) {
+              lobby.userCount += change.deltaCount;
+            }
+            return lobby;
+          }));
+      }));
     this.isLoading.set(false);
   }
 

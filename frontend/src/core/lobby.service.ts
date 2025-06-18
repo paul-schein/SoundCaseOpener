@@ -24,6 +24,8 @@ export class LobbyService {
   private readonly userPlayedSoundSubject =
     new Subject<{ username: string; filePath: string }>();
   private readonly caseObtainedSubject = new Subject<number>();
+  private readonly lobbyUserCountChangeSubject =
+    new Subject<{ lobbyId: string; deltaCount: number }>();
 
   public readonly lobbyCreated$ = this.lobbyCreatedSubject.asObservable();
   public readonly lobbyClosed$ = this.lobbyClosedSubject.asObservable();
@@ -31,6 +33,7 @@ export class LobbyService {
   public readonly userLeftLobby$ = this.userLeftLobbySubject.asObservable();
   public readonly userPlayedSound$ = this.userPlayedSoundSubject.asObservable();
   public readonly caseObtained$ = this.caseObtainedSubject.asObservable();
+  public readonly lobbyUserCountChange$ = this.lobbyUserCountChangeSubject.asObservable();
 
   public async initializeConnection(): Promise<void> {
     if (this.initialized) {
@@ -76,7 +79,16 @@ export class LobbyService {
     return lobbyListZod.parse(data);
   }
 
+  public async getLobbyById(lobbyId: string): Promise<Lobby | null> {
+    const data = await this.connection.invoke<any>('GetLobbyByIdAsync', lobbyId);
+    if (data === null) {
+      return null;
+    }
+    return lobbyZod.parse(data);
+  }
+
   public async getUsersInLobby(lobbyId: string): Promise<string[]> {
+    console.log(lobbyId);
     const data = await this.connection.invoke<any>('GetUsersInLobbyAsync', lobbyId);
     return userListZod.parse(data);
   }
@@ -104,6 +116,9 @@ export class LobbyService {
     });
     this.connection.on('ReceiveCaseObtainedAsync', (caseId: number) => {
       this.caseObtainedSubject.next(caseId);
+    });
+    this.connection.on('ReceiveLobbyUserCountChangeAsync', (lobbyId: string, deltaCount: number) => {
+      this.lobbyUserCountChangeSubject.next({lobbyId, deltaCount});
     });
   }
 }

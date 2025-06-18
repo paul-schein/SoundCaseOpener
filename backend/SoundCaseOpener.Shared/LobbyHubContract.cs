@@ -8,6 +8,7 @@ public interface ILobbyHub
     public ValueTask<bool> JoinLobbyAsync(string lobbyId, int userId);
     public ValueTask<bool> LeaveLobbyAsync();
     public ValueTask<IReadOnlyCollection<Lobby>> GetLobbiesAsync();
+    public ValueTask<Lobby?> GetLobbyByIdAsync(string lobbyId);
     public ValueTask<IReadOnlyCollection<string>> GetUsersInLobbyAsync(string lobbyId);
 
     public ValueTask<bool> PlaySoundAsync(int soundId);
@@ -19,6 +20,7 @@ public interface ILobbyHubClient
     public Task ReceiveLobbyClosedAsync(string lobbyId);
     public Task ReceiveUserJoinedLobbyAsync(string username);
     public Task ReceiveUserLeftLobbyAsync(string username);
+    public Task ReceiveLobbyUserCountChangeAsync(string lobbyId, int deltaCount);
     public Task ReceiveUserPlayedSoundAsync(string username, string filePath);
     public Task ReceiveCaseObtainedAsync(int caseId);
 }

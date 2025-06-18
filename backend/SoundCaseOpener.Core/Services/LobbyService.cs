@@ -15,9 +15,11 @@ public interface ILobbyService
 {
     public ValueTask<OneOf<Success<Lobby>, ILobbyService.NotAllowed>> 
         CreateLobbyAsync(string connectionId, string name, int userId);
-    public ValueTask<OneOf<Success<(IReadOnlyCollection<string> connections, string username)>, NotFound>> 
+    public ValueTask<OneOf<Success<(IReadOnlyCollection<string> connections, string username, 
+            string lobbyId)>, NotFound>> 
         JoinLobbyAsync(string connectionId, string lobbyId, int userId);
-    public ValueTask<OneOf<Success<(IReadOnlyCollection<string> connections, string username)>, NotFound>> 
+    public ValueTask<OneOf<Success<(IReadOnlyCollection<string> connections, string username, 
+            string lobbyId, bool lobbyDeleted)>, NotFound>> 
         LeaveLobbyAsync(string connectionId);
     public ValueTask<IReadOnlyCollection<Lobby>> GetLobbiesAsync();
     public ValueTask<IReadOnlyCollection<string>> GetUsersInLobbyAsync(string lobbyId);
@@ -26,6 +28,7 @@ public interface ILobbyService
             SuccessCaseObtained,
             NotFound, NotAllowed>> 
         PlaySoundAsync(int soundId);
+    public ValueTask<OneOf<Lobby, NotFound>> GetLobbyByIdAsync(string lobbyId);
     
     public readonly record struct NotAllowed;
     public readonly record struct SuccessCaseObtained(UsersSoundPlayed UsersSoundPlayed, UserCases UserCases);
@@ -83,7 +86,8 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
         return new Success<Lobby>(lobby);
     }
 
-    public async ValueTask<OneOf<Success<(IReadOnlyCollection<string> connections, string username)>, NotFound>> 
+    public async ValueTask<OneOf<Success<(IReadOnlyCollection<string> connections, 
+            string username, string lobbyId)>, NotFound>> 
         JoinLobbyAsync(string connectionId, string lobbyId, int userId)
     {
         User? user = await GetUnitOfWork().UserRepository.GetUserByIdAsync(userId);
@@ -113,13 +117,13 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
             _connections[user.Username] = connectionId;
             _connectionUsers[connectionId] = userId;
 
-            return new Success<(IReadOnlyCollection<string> connections, string username)>(
-             (GetConnectionIdsOfLobby(lobbyId), user.Username));
+            return new Success<(IReadOnlyCollection<string> connections, string username, string lobbyId)>(
+             (GetConnectionIdsOfLobby(lobbyId), user.Username, lobbyId));
         }
     }
 
     public async ValueTask<OneOf<Success<(IReadOnlyCollection<string> connections, 
-            string username)>, NotFound>> 
+            string username, string lobbyId, bool lobbyDeleted)>, NotFound>> 
         LeaveLobbyAsync(string connectionId)
     {
         using (await _lobbiesLock.WriterLockAsync())
@@ -154,19 +158,23 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
             _connections.Remove(user.Username);
             _connectionUsers.Remove(connectionId);
             
-            if (lobby.UserCount <= 1)
+            bool lobbyDeleted = lobby.UserCount <= 1;
+            if (lobbyDeleted)
             {
                 _lobbyUsers.Remove(lobbyId);
                 _lobbies.Remove(lobbyId);
+                logger.LogInformation("Lobby {LobbyId} deleted as it had no users left", lobbyId);
             }
             else
             {
                 _lobbyUsers[lobbyId].Remove(user.Username);
                 _lobbies[lobbyId] = lobby with { UserCount = lobby.UserCount - 1 };
+                logger.LogInformation("User {Username} left lobby {LobbyId}", user.Username, lobbyId);
             }
 
-            return new Success<(IReadOnlyCollection<string> connections, string username)>(
-                 (GetConnectionIdsOfLobby(lobbyId), user.Username));
+            return new Success<(IReadOnlyCollection<string> connections, string username, 
+                string lobbyId, bool lobbyDeleted)>(
+                 (GetConnectionIdsOfLobby(lobbyId), user.Username, lobbyId, lobbyDeleted));
         }
     }
 
@@ -241,9 +249,22 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
         }
     }
 
+    public async ValueTask<OneOf<Lobby, NotFound>> GetLobbyByIdAsync(string lobbyId)
+    {
+        using (await _lobbiesLock.ReaderLockAsync())
+        {
+            if (!_lobbies.TryGetValue(lobbyId, out Lobby? lobby))
+            {
+                logger.LogWarning("Lobby with id {LobbyId} not found", lobbyId);
+                return new NotFound();
+            }
+            return lobby;
+        }
+    }
+
     private async ValueTask<ILobbyService.UserCases> CreateCasesForUsers(CaseTemplate template,
-                                                        IReadOnlyCollection<User> users, 
-                                                        IUnitOfWork uow)
+                                                                         IReadOnlyCollection<User> users, 
+                                                                         IUnitOfWork uow)
     {
         List<Case> cases = [];
         foreach (User user in users)

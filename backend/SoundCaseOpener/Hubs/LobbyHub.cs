@@ -50,7 +50,7 @@ public sealed class LobbyHub(ILobbyService lobbyService,
             return false;
         }
         
-        OneOf<Success<(IReadOnlyCollection<string> connections, string username)>, NotFound> result = 
+        OneOf<Success<(IReadOnlyCollection<string> connections, string username, string lobbyId)>, NotFound> result = 
             await lobbyService.JoinLobbyAsync(Context.ConnectionId, lobbyId, userId);
         
         return result.Match<bool>(
@@ -58,6 +58,7 @@ public sealed class LobbyHub(ILobbyService lobbyService,
             {
                 Clients.Clients(success.Value.connections)
                        .ReceiveUserJoinedLobbyAsync(success.Value.username);
+                Clients.All.ReceiveLobbyUserCountChangeAsync(success.Value.lobbyId, 1);
                 logger.LogInformation("Sent user joined lobby event to all other clients for lobby {LobbyId}", lobbyId);
                 return true;
             },
@@ -66,13 +67,22 @@ public sealed class LobbyHub(ILobbyService lobbyService,
 
     public async ValueTask<bool> LeaveLobbyAsync()
     {
-        OneOf<Success<(IReadOnlyCollection<string> connections, string username)>, NotFound> result = 
+        OneOf<Success<(IReadOnlyCollection<string> connections, string username, 
+            string lobbyId, bool lobbyDeleted)>, NotFound> result = 
             await lobbyService.LeaveLobbyAsync(Context.ConnectionId);
 
         return result.Match<bool>(success =>
         {
             Clients.Clients(success.Value.connections)
                    .ReceiveUserLeftLobbyAsync(success.Value.username);
+            if (success.Value.lobbyDeleted)
+            {
+                Clients.All.ReceiveLobbyClosedAsync(success.Value.lobbyId);
+            }
+            else
+            {
+                Clients.All.ReceiveLobbyUserCountChangeAsync(success.Value.lobbyId, -1);
+            }
             logger.LogInformation("Sent user left lobby event to all other clients for lobby {LobbyId}", 
                                   success.Value.username);
             return true;
@@ -82,6 +92,18 @@ public sealed class LobbyHub(ILobbyService lobbyService,
 
     public async ValueTask<IReadOnlyCollection<Lobby>> GetLobbiesAsync() => 
         await lobbyService.GetLobbiesAsync();
+
+    public async ValueTask<Lobby?> GetLobbyByIdAsync(string lobbyId)
+    {
+        OneOf<Lobby, NotFound> result = await lobbyService.GetLobbyByIdAsync(lobbyId);
+        return result.Match<Lobby?>(
+            success => success,
+            notFound =>
+            {
+                logger.LogWarning("Lobby with id {LobbyId} not found", lobbyId);
+                return null;
+            });
+    }
 
     public async ValueTask<IReadOnlyCollection<string>> GetUsersInLobbyAsync(string lobbyId) => 
         await lobbyService.GetUsersInLobbyAsync(lobbyId);

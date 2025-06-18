@@ -12,7 +12,7 @@
     @else {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         @for (lobby of lobbies(); track $index) {
-          <app-lobby-card [lobby]="lobby"></app-lobby-card>
+          <app-lobby-card [lobby]="lobby" [routerLink]="['/lobby', lobby.id]"></app-lobby-card>
         }
       </div>
     }

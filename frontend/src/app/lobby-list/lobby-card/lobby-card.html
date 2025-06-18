@@ -6,9 +6,6 @@
         {{ lobby().id }}
       </mat-card-subtitle>
     </div>
-    <div class="text-red-600 text-3xl font-bold">
-      {{ lobby().userCount }}
-      <mat-icon fontIcon="person"></mat-icon>
-    </div>
+    <app-lobby-user-count [lobby]="lobby()"></app-lobby-user-count>
   </mat-card-header>
 </mat-card>
