@@ -55,12 +55,12 @@ export class LobbyService {
   }
 
   public async createLobby(name: string): Promise<Lobby> {
-    const data = await this.connection.invoke<any>('CreateLobbyAsync', name, this.loginService.currentUser?.id);
+    const data = await this.connection.invoke<any>('CreateLobbyAsync', name, this.loginService.currentUser()?.id);
     return lobbyZod.parse(data);
   }
 
   public async joinLobby(lobbyId: string): Promise<boolean> {
-    return await this.connection.invoke<boolean>('JoinLobbyAsync', lobbyId, this.loginService.currentUser?.id);
+    return await this.connection.invoke<boolean>('JoinLobbyAsync', lobbyId, this.loginService.currentUser()?.id);
   }
 
   public async leaveLobby(lobbyId: string): Promise<boolean> {

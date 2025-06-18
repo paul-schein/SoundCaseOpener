@@ -33,7 +33,9 @@ export class LobbyList implements OnInit, OnDestroy {
 
   public async ngOnInit(): Promise<void> {
     await this.lobbyService.initializeConnection();
+    console.log('Lobbies loading...');
     this.lobbies.set(await this.lobbyService.getLobbies());
+    console.log('Lobbies loaded:', this.lobbies());
     this.subscriptions.push(this.lobbyService.lobbyCreated$.subscribe(lobby => {
       this.lobbies.update(lobbies => [...lobbies, lobby]);
     }));
@@ -41,7 +43,9 @@ export class LobbyList implements OnInit, OnDestroy {
       this.lobbies.update(lobbies =>
         lobbies.filter(lobby => lobby.id !== lobbyId));
     }));
+    console.log('Lobby list initialized');
     this.isLoading.set(false);
+    console.log('Lobbie');
   }
 
   public async ngOnDestroy(): Promise<void> {

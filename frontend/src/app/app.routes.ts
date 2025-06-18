@@ -6,8 +6,9 @@ import {LobbyList} from './lobby-list/lobby-list';
 import {LobbyDetail} from './lobby-list/lobby-detail/lobby-detail';
 
 export const routes: Routes = [
-  {path: '', component: Home, canActivate: [authGuard]},
+  {path: 'home', component: Home, canActivate: [authGuard]},
   {path: 'login', component: Login},
-  {path: 'lobbies', component: LobbyList},
-  {path: 'lobby/:lobbyId?isCreator', component: LobbyDetail}
+  {path: 'lobbies', component: LobbyList, canActivate: [authGuard]},
+  {path: 'lobby/:lobbyId?isCreator', component: LobbyDetail, canActivate: [authGuard]},
+  {path: '**', redirectTo: 'login', pathMatch: 'full'},
 ];

@@ -1,17 +1,18 @@
-<div class="centered">
-<div class="inner-container">
-  <h2 class="label">Welcome</h2>
-  <p>Please login or register by choosing a non-existent username</p>
-  <form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
-    <mat-form-field>
-      <mat-label>Username</mat-label>
-      <input matInput formControlName="username"/>
-      @if (formGroup.get('username')?.hasError('required')){
-        <mat-error>Username is required!</mat-error>
-      }
-    </mat-form-field>
-    <button mat-raised-button color="primary" type="submit" [disabled]="formGroup.invalid">Login/Register</button>
-  </form>
-</div>
-
-</div>
+@if (!isLoggedIn()) {
+  <div class="centered">
+    <div class="inner-container">
+      <h2 class="label">Welcome</h2>
+      <p>Please login or register by choosing a non-existent username</p>
+      <form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+        <mat-form-field>
+          <mat-label>Username</mat-label>
+          <input matInput formControlName="username"/>
+          @if (formGroup.get('username')?.hasError('required')){
+            <mat-error>Username is required!</mat-error>
+          }
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit" [disabled]="formGroup.invalid">Login/Register</button>
+      </form>
+    </div>
+  </div>
+}
