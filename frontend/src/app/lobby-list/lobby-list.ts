@@ -27,15 +27,19 @@ export class LobbyList implements OnInit, OnDestroy {
   private readonly router = inject(Router);
 
   protected async handleCreateLobby(): Promise<void> {
-    const lobby: Lobby = await this.lobbyService.createLobby("test");
-    await this.router.navigate(['/lobby', lobby.id]);
+    const lobby: Lobby | null = await this.lobbyService.createLobby("test");
+    if (lobby === null) {
+      console.error('Failed to create lobby');
+      return;
+    }
+    await this.router.navigate(['/lobby', lobby.id], {
+      queryParams: {isCreator: 'true'}
+    });
   }
 
   public async ngOnInit(): Promise<void> {
     await this.lobbyService.initializeConnection();
-    console.log('Lobbies loading...');
     this.lobbies.set(await this.lobbyService.getLobbies());
-    console.log('Lobbies loaded:', this.lobbies());
     this.subscriptions.push(this.lobbyService.lobbyCreated$.subscribe(lobby => {
       this.lobbies.update(lobbies => [...lobbies, lobby]);
     }));
@@ -43,9 +47,7 @@ export class LobbyList implements OnInit, OnDestroy {
       this.lobbies.update(lobbies =>
         lobbies.filter(lobby => lobby.id !== lobbyId));
     }));
-    console.log('Lobby list initialized');
     this.isLoading.set(false);
-    console.log('Lobbie');
   }
 
   public async ngOnDestroy(): Promise<void> {

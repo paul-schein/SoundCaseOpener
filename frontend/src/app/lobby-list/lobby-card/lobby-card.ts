@@ -1,5 +1,6 @@
 import {Component, input, InputSignal} from '@angular/core';
 import {MatCard, MatCardHeader, MatCardSubtitle, MatCardTitle} from '@angular/material/card';
+import {MatIcon} from '@angular/material/icon';
 import {Lobby} from '../../../core/lobby.service';
 
 @Component({
@@ -8,7 +9,8 @@ import {Lobby} from '../../../core/lobby.service';
     MatCard,
     MatCardHeader,
     MatCardTitle,
-    MatCardSubtitle
+    MatCardSubtitle,
+    MatIcon
   ],
   templateUrl: './lobby-card.html',
   styleUrl: './lobby-card.scss'

@@ -4,7 +4,7 @@ public interface ILobbyHub
 {
     public const string Route = "hub/lobby";
 
-    public ValueTask<Lobby> CreateLobbyAsync(string name, int userId);
+    public ValueTask<Lobby?> CreateLobbyAsync(string name, int userId);
     public ValueTask<bool> JoinLobbyAsync(string lobbyId, int userId);
     public ValueTask<bool> LeaveLobbyAsync();
     public ValueTask<IReadOnlyCollection<Lobby>> GetLobbiesAsync();

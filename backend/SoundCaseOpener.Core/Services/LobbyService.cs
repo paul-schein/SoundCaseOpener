@@ -13,7 +13,8 @@ namespace SoundCaseOpener.Core.Services;
 
 public interface ILobbyService
 {
-    public ValueTask<Lobby> CreateLobbyAsync(string connectionId, string name, int userId);
+    public ValueTask<OneOf<Success<Lobby>, ILobbyService.NotAllowed>> 
+        CreateLobbyAsync(string connectionId, string name, int userId);
     public ValueTask<OneOf<Success<(IReadOnlyCollection<string> connections, string username)>, NotFound>> 
         JoinLobbyAsync(string connectionId, string lobbyId, int userId);
     public ValueTask<OneOf<Success<(IReadOnlyCollection<string> connections, string username)>, NotFound>> 
@@ -49,8 +50,15 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
     private readonly Dictionary<string, int> _connectionUsers = [];
     private readonly AsyncReaderWriterLock _lobbiesLock = new();
 
-    public async ValueTask<Lobby> CreateLobbyAsync(string connectionId, string name, int userId)
+    public async ValueTask<OneOf<Success<Lobby>, ILobbyService.NotAllowed>>
+        CreateLobbyAsync(string connectionId, string name, int userId)
     {
+        if (_connectionUsers.ContainsKey(connectionId))
+        {
+            logger.LogWarning("Connection {ConnectionId} is already associated with a user", connectionId);
+            return new ILobbyService.NotAllowed();
+        }
+        
         User? user = await GetUnitOfWork().UserRepository.GetUserByIdAsync(userId);
         if (user is null)
         {
@@ -72,7 +80,7 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
         
         logger.LogInformation("Lobby {LobbyId} created by user {Username}", lobbyId, user.Username);
         
-        return lobby;
+        return new Success<Lobby>(lobby);
     }
 
     public async ValueTask<OneOf<Success<(IReadOnlyCollection<string> connections, string username)>, NotFound>> 
@@ -253,15 +261,12 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
     
     private IReadOnlyCollection<string> GetConnectionIdsOfLobby(string lobbyId)
     {
-        using (_lobbiesLock.ReaderLock())
+        if (!_lobbyUsers.TryGetValue(lobbyId, out HashSet<string>? users))
         {
-            if (!_lobbyUsers.TryGetValue(lobbyId, out HashSet<string>? users))
-            {
-                logger.LogWarning("Lobby with id {LobbyId} not found", lobbyId);
-                return [];
-            }
-            return users.Select(u => _connections[u]).ToList();
+            logger.LogWarning("Lobby with id {LobbyId} not found", lobbyId);
+            return [];
         }
+        return users.Select(u => _connections[u]).ToList();
     }
 
     private IUnitOfWork GetUnitOfWork()

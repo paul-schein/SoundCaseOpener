@@ -54,8 +54,12 @@ export class LobbyService {
     }
   }
 
-  public async createLobby(name: string): Promise<Lobby> {
-    const data = await this.connection.invoke<any>('CreateLobbyAsync', name, this.loginService.currentUser()?.id);
+  public async createLobby(name: string): Promise<Lobby | null> {
+    const data = await this.connection.invoke<any>('CreateLobbyAsync', name,
+      this.loginService.currentUser()?.id);
+    if (data === null) {
+      return null;
+    }
     return lobbyZod.parse(data);
   }
 

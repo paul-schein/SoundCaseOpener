@@ -11,7 +11,7 @@ public sealed class LobbyHub(ILobbyService lobbyService,
                              ITransactionProvider transaction,
                              ILogger<LobbyHub> logger) : Hub<ILobbyHubClient>, ILobbyHub
 {
-    public async ValueTask<Lobby> CreateLobbyAsync(string name, int userId)
+    public async ValueTask<Lobby?> CreateLobbyAsync(string name, int userId)
     {
         if (userId <= 0)
         {
@@ -19,13 +19,21 @@ public sealed class LobbyHub(ILobbyService lobbyService,
             throw new ArgumentException("User id must be greater than 0", nameof(userId));
         }
         
-        Lobby lobby =  await lobbyService.CreateLobbyAsync(Context.ConnectionId, name, userId);
+        OneOf<Success<Lobby>, ILobbyService.NotAllowed> result =  
+            await lobbyService.CreateLobbyAsync(Context.ConnectionId, name, userId);
 
-        await Clients.Others.ReceiveLobbyCreatedAsync(lobby);
-        
-        logger.LogInformation("Sent lobby created event to all other clients for lobby {LobbyId}", lobby.Id);
-        
-        return lobby;
+        return await result.Match<ValueTask<Lobby?>>(
+            async success =>
+            {
+                await Clients.Others.ReceiveLobbyCreatedAsync(success.Value);
+                logger.LogInformation("Sent lobby created event to all other clients for lobby {LobbyId}", 
+                                      success.Value.Id);
+                return success.Value;
+            }, notAllowed =>
+            {
+                logger.LogWarning("User {UserId} is not allowed to create a lobby", userId);
+                return ValueTask.FromResult<Lobby?>(null);
+            });
     }
 
     public async ValueTask<bool> JoinLobbyAsync(string lobbyId, int userId)
