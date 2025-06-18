@@ -1,5 +1,5 @@
 import { CanActivateFn , Router} from '@angular/router';
-import {LoginService} from '../core/login.service';
+import {LoginService, User} from '../core/login.service';
 import { inject } from '@angular/core';
 
 export const authGuard: CanActivateFn = async (route, state) => {
@@ -15,3 +15,16 @@ export const authGuard: CanActivateFn = async (route, state) => {
 
   return isLoggedIn;
 };
+
+export const isAdminAuthGuard: CanActivateFn = async (route, state) => {
+  const service: LoginService = inject(LoginService);
+  const router: Router = inject(Router);
+
+  const currentUser: User | null = service.currentUser();
+
+  if (currentUser === null ||  currentUser.role !== 'Admin') {
+    await router.navigate(['/home']);
+    return false;
+  }
+  return true;
+}
