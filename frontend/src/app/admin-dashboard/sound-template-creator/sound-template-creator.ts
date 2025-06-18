@@ -6,7 +6,7 @@ import { Rarity, RaritySchema } from '../../../core/util/zod-schemas';
 import {MatButton} from '@angular/material/button';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {toSignal} from '@angular/core/rxjs-interop';
-import {SnackbarService} from '../../../core/services/snackbar-service';i
+import {SnackbarService} from '../../../core/services/snackbar-service';
 import {ConfigService} from '../../../core/services/config-service';
 import {NewSoundTemplate, SoundTemplateService} from '../../../core/services/sound-template-service';
 import {SoundFile, SoundFileService} from '../../../core/services/sound-file-service';
