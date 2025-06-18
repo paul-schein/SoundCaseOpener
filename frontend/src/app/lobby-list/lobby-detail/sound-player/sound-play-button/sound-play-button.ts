@@ -1,6 +1,7 @@
 import {Component, computed, inject, input, InputSignal, Signal, signal, WritableSignal} from '@angular/core';
 import {MatButton} from '@angular/material/button';
 import {LobbyService} from '../../../../../core/services/lobby-service';
+import {Sound} from '../../../../../core/services/sound-service';
 
 @Component({
   selector: 'app-sound-play-button',
@@ -11,7 +12,7 @@ import {LobbyService} from '../../../../../core/services/lobby-service';
   styleUrl: './sound-play-button.scss'
 })
 export class SoundPlayButton {
-  public readonly soundId: InputSignal<number> = input.required<number>();
+  public readonly sound: InputSignal<Sound> = input.required<Sound>();
   protected readonly currentCooldown: WritableSignal<number> = signal(0);
   protected readonly btnDisabled: Signal<boolean> = computed(() => {
     return this.currentCooldown() > 0;
@@ -21,8 +22,9 @@ export class SoundPlayButton {
   private intervalId: number | null = null;
 
   protected async handlePlaySound(): Promise<void> {
-    if (await this.lobbyService.playSound(this.soundId()) || true) { // remove true when sound object is available
-      this.startCooldown(10);
+    const sound: Sound = this.sound();
+    if (await this.lobbyService.playSound(sound.id)) {
+      this.startCooldown(sound.cooldown);
     }
   }
 
