@@ -1,10 +1,12 @@
 <div class="flex flex-col justify-content items-center">
   <h1 class="mb-7 text-4xl font-bold">Your Sounds!</h1>
   <div class="flex flex-row flex-wrap justify-center gap-4">
-    <app-sound-play-button [soundId]="2"></app-sound-play-button>
-    <app-sound-play-button [soundId]="3"></app-sound-play-button>
-    <app-sound-play-button [soundId]="4"></app-sound-play-button>
-    <app-sound-play-button [soundId]="5"></app-sound-play-button>
-    <app-sound-play-button [soundId]="6"></app-sound-play-button>
+    @if (noSounds()) {
+      <p class="text-lg text-gray-500">You don't own any sounds!</p>
+    } @else {
+      @for (sound of sounds(); track $index) {
+        <app-sound-play-button [sound]="sound"></app-sound-play-button>
+      }
+    }
   </div>
 </div>

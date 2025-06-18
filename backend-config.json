@@ -27,9 +27,10 @@
         "StarterCasesAmount": 3,
         "RandomCaseChance": 0.01,
         "SoundFilesPath": "sounds", 
-        "AllowedFileExtensions": [".mp3", ".wav", ".ogg"], 
-        "AllowedFileTypes": ["audio/mpeg", "audio/wav", "audio/ogg"], 
-        "ClientOrigin": "http://localhost:4200"
+        "AllowedFileExtensions": [".mp3", ".wav", ".ogg"],
+        "AllowedFileTypes": ["audio/mpeg", "audio/wav", "audio/ogg"],
+        "AdminUsers": ["jP6tWq2RzF9xS4vBcY7nM8kL1hD"],
+        "ClientOrigin": "http://localhost:5100"
     },
     "ConnectionStrings": {
       "Postgres": "Host=database;Database=postgres;Username=postgres;Password=postgres"

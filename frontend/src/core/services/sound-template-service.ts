@@ -1,10 +1,8 @@
-import {inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {ServiceBase} from './service-base';
 import {z} from 'zod';
-import {ConfigService} from '../config.service';
 import {RaritySchema} from '../util/zod-schemas';
 import {firstValueFrom, lastValueFrom} from 'rxjs';
-import {SoundFileListResponse} from './sound-file-service';
 
 @Injectable({
   providedIn: 'root'
@@ -68,3 +66,4 @@ const soundTemplateListResponseSchema = z.object({
 })
 
 export type SoundTemplateListResponse = z.infer<typeof soundTemplateListResponseSchema>;
+export type SoundTemplate = z.infer<typeof soundTemplateSchema>;

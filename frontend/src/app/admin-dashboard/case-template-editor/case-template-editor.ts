@@ -2,18 +2,14 @@ import {Component, computed, inject, OnInit, signal, Signal, WritableSignal} fro
 import {MatError, MatFormField, MatInput, MatLabel} from '@angular/material/input';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
-import { Rarity, RaritySchema } from '../../../core/util/zod-schemas';
 import {MatButton} from '@angular/material/button';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {SnackbarService} from '../../../core/services/snackbar-service';
-import {ConfigService} from '../../../core/config.service';
 import {
-  NewSoundTemplate,
   SoundTemplateResponse,
   SoundTemplateService
 } from '../../../core/services/sound-template-service';
-import {SoundFile, SoundFileService} from '../../../core/services/sound-file-service';
 import {
   CaseTemplate,
   CaseTemplateService,

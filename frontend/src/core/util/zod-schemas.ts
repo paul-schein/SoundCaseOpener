@@ -9,3 +9,5 @@ export const RaritySchema = z.enum([
 ]);
 
 export type Rarity = z.infer<typeof RaritySchema>;
+
+export const RoleSchema = z.enum(['User', 'Admin']);

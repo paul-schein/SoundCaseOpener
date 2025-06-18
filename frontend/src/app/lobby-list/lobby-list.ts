@@ -8,7 +8,7 @@ import {
   signal,
   WritableSignal
 } from '@angular/core';
-import {Lobby, LobbyService} from '../../core/lobby.service';
+import {Lobby, LobbyService} from '../../core/services/lobby-service';
 import {Subscription} from 'rxjs';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {LobbyCard} from './lobby-card/lobby-card';

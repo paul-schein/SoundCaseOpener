@@ -7,7 +7,7 @@ import {MatButton} from '@angular/material/button';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {SnackbarService} from '../../../core/services/snackbar-service';
-import {ConfigService} from '../../../core/config.service';
+import {ConfigService} from '../../../core/services/config-service';
 import {CaseTemplateService, NewCaseTemplate} from '../../../core/services/case-template-service';
 
 @Component({

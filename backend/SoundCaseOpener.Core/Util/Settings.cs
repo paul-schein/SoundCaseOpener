@@ -8,5 +8,6 @@ public sealed class Settings
     public required string SoundFilesPath { get; init; }
     public required IReadOnlyCollection<string> AllowedFileExtensions { get; init; }
     public required IReadOnlyCollection<string> AllowedFileTypes { get; init; }
+    public required IReadOnlyCollection<string> AdminUsers { get; init; }
     public required string ClientOrigin { get; init; }
 }
