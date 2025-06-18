@@ -11,7 +11,7 @@ Content-Type: multipart/form-data; boundary=----TestBoundary
 Content-Disposition: form-data; name="file"; filename="test.mp3"
 Content-Type: audio/mpeg
 
-< Data/I-LOVE-GMS.mp3
+< Data/soundcaseopener.mp3
 ------TestBoundary--
 
 > {%
@@ -138,24 +138,24 @@ PATCH {{Host}}/api/sounds/{{soundId}}/name/testSoundName
 
 
 ### Delete User by ID
-DELETE {{Host}}/api/users/{{userId}}
+#DELETE {{Host}}/api/users/{{userId}}
 
 
 
 ###
-DELETE {{Host}}/api/case-templates/{{caseTemplateId}}/item-template/{{soundTemplateId}}
+##DELETE {{Host}}/api/case-templates/{{caseTemplateId}}/item-template/{{soundTemplateId}}
 
 ### Get all Sound Templates in a Case Template again
-GET {{Host}}/api/case-templates/{{caseTemplateId}}/sound-templates
+##GET {{Host}}/api/case-templates/{{caseTemplateId}}/sound-templates
 
 ### Delete Case Template by ID
-DELETE {{Host}}/api/case-templates/{{caseTemplateId}}
+##DELETE {{Host}}/api/case-templates/{{caseTemplateId}}
 
 ### Delete Sound Template by ID
-DELETE {{Host}}/api/sound-templates/{{soundTemplateId}}
+##DELETE {{Host}}/api/sound-templates/{{soundTemplateId}}
 
 ### Delete Sound File by ID
-DELETE {{Host}}/api/sound-files/{{soundFileId}}
+##DELETE {{Host}}/api/sound-files/{{soundFileId}}
 
 ### Get all Sound Files again
-GET {{Host}}/api/sound-files
+##GET {{Host}}/api/sound-files

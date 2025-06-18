@@ -41,6 +41,7 @@ export class LobbyDetail implements OnInit, OnDestroy {
   private readonly router: Router = inject(Router);
   private readonly snackbar: SnackbarService = inject(SnackbarService);
   private readonly subscriptions: Subscription[] = [];
+  private readonly audios: HTMLAudioElement[] = [];
 
   protected async handleLeaveLobby(): Promise<void> {
     await this.lobbyService.leaveLobby(this.lobbyId());
@@ -92,6 +93,7 @@ export class LobbyDetail implements OnInit, OnDestroy {
 
   private async handleSoundPlayed(username: string, filePath: string): Promise<void> {
     const audio = new Audio(`${this.configService.config.soundsBaseUrl}/${filePath}`);
+    this.audios.push(audio);
     await audio.play();
     if (!this.usersWithSound().includes(username)) {
       this.usersWithSound.update(current => [...current, username]);
@@ -102,6 +104,10 @@ export class LobbyDetail implements OnInit, OnDestroy {
   }
 
   public async ngOnDestroy(): Promise<void> {
+    this.audios.forEach(audio => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
     await this.lobbyService.leaveLobby(this.lobbyId());
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }

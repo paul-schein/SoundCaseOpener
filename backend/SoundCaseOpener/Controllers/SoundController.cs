@@ -77,12 +77,14 @@ public class SoundController(ISoundService soundService,
 
 public sealed record AllSoundsOfUserResponse(IReadOnlyCollection<SoundDto> Sounds);
 
-public sealed record SoundDto(int Id, string Name, string Description, Rarity Rarity, int Cooldown, string FilePath)
+public sealed record SoundDto(int Id, string Name, string Description, Rarity Rarity, 
+                              int Cooldown, Instant? LastTimeUsed, string FilePath)
 {
     public static SoundDto FromSound(Sound sound) => 
         new(sound.Id, sound.Name, 
             sound.Template.Description, 
             sound.Template.Rarity,
             sound.Cooldown,
+            sound.LastTimeUsed,
             ((SoundTemplate)sound.Template).SoundFile.FilePath);
 }
