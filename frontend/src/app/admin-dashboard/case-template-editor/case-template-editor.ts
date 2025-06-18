@@ -6,15 +6,8 @@ import {MatButton} from '@angular/material/button';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {SnackbarService} from '../../../core/services/snackbar-service';
-import {
-  SoundTemplateResponse,
-  SoundTemplateService
-} from '../../../core/services/sound-template-service';
-import {
-  CaseTemplate,
-  CaseTemplateService,
-  NewItemTemplateToCaseTemplate
-} from '../../../core/services/case-template-service';
+import { SoundTemplateResponse, SoundTemplateService} from '../../../core/services/sound-template-service';
+import { CaseTemplate, CaseTemplateService, NewItemTemplateToCaseTemplate} from '../../../core/services/case-template-service';
 
 @Component({
   selector: 'app-case-template-editor',
