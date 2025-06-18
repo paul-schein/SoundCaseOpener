@@ -1,7 +1,7 @@
 import {inject, Injectable } from '@angular/core';
 import {ServiceBase} from './service-base'
 import { z } from 'zod';
-import {RaritySchema} from '../util/zod-schemas';
+import {InstantSchema, RaritySchema} from '../util/zod-schemas';
 import {LoginService} from './login-service';
 import {firstValueFrom} from 'rxjs';
 
@@ -34,6 +34,7 @@ const soundZod = z.object({
   description: z.string().nonempty().max(200),
   rarity: RaritySchema,
   cooldown: z.number().int().nonnegative(),
+  lastTimeUsed: InstantSchema.nullable(),
   filePath: z.string().nonempty()
 });
 
