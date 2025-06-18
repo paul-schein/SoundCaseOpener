@@ -2,5 +2,14 @@
         (click)="handlePlaySound()"
         class="flex flex-row items-center !p-5 !text-2xl"
         [disabled]="btnDisabled()">
-  <span>{{currentCooldown()}} {{sound().name}}</span>
+  <span>
+    {{sound().name}} (
+    @if (btnDisabled()) {
+      {{currentCooldown()}}
+    }
+    @else {
+      {{sound().cooldown}}
+    }
+    )
+  </span>
 </button>

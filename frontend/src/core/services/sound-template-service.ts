@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {ServiceBase} from './service-base';
 import {z} from 'zod';
 import {RaritySchema} from '../util/zod-schemas';
-import {lastValueFrom} from 'rxjs';
+import {firstValueFrom, lastValueFrom} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,20 @@ export class SoundTemplateService extends ServiceBase {
     return 'sound-templates';
   }
 
-  public async addSoundTemplate(newSoundTemplate: NewSoundTemplate): Promise<SoundTemplate | undefined> {
+  public async getAllSoundTemplates(): Promise<SoundTemplateListResponse | undefined> {
+    const url = this.buildUrl(null);
+    try {
+      const response = await firstValueFrom(this.http.get<SoundTemplateListResponse>(url, { observe: "response" }));
+
+      const data = soundTemplateListResponseSchema.parse(response.body);
+      return data as SoundTemplateListResponse;
+    } catch (error) {
+      console.log(`Error getting Sound Templates: ${JSON.stringify(error)}`);
+      return undefined;
+    }
+  }
+
+  public async addSoundTemplate(newSoundTemplate: NewSoundTemplate): Promise<SoundTemplateResponse | undefined> {
     const url = this.buildUrl(null);
 
     try {
@@ -46,4 +59,11 @@ const soundTemplateSchema = newSoundTemplateSchema.extend({
   id: z.number().nonnegative(),
 });
 
+export type SoundTemplateResponse = z.infer<typeof soundTemplateSchema>;
+
+const soundTemplateListResponseSchema = z.object({
+  soundTemplates: soundTemplateSchema.array()
+})
+
+export type SoundTemplateListResponse = z.infer<typeof soundTemplateListResponseSchema>;
 export type SoundTemplate = z.infer<typeof soundTemplateSchema>;

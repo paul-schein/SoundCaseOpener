@@ -18,10 +18,10 @@ export class SoundFileService extends ServiceBase {
     try {
       const response = await firstValueFrom(this.http.get<SoundFileListResponse>(url, { observe: "response" }));
 
-      const data = soundFileListSchemaResponse.parse(response.body);
+      const data = soundFileListResponseSchema.parse(response.body);
       return data as SoundFileListResponse;
     } catch (error) {
-      console.log(`Error getting soundFiles: ${JSON.stringify(error)}`);
+      console.log(`Error getting Sound Files: ${JSON.stringify(error)}`);
       return undefined;
     }
   }
@@ -109,11 +109,11 @@ const soundFileSchemaResponse = z.object({
 
 export type SoundFile = z.infer<typeof soundFileSchemaResponse>;
 
-const soundFileListSchemaResponse = z.object({
+const soundFileListResponseSchema = z.object({
   soundFiles: soundFileSchemaResponse.array(),
 });
 
-export type SoundFileListResponse = z.infer<typeof soundFileListSchemaResponse>;
+export type SoundFileListResponse = z.infer<typeof soundFileListResponseSchema>;
 
 export class UploadResult {
   constructor(private readonly statusCode: number) {

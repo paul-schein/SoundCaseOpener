@@ -4,12 +4,16 @@ import {ConfigService} from './config-service';
 
 @Directive()
 export abstract class ServiceBase {
-  private static readonly baseUrl: string = 'http://localhost:5200/api';
+  private readonly configService: ConfigService = inject(ConfigService);
+  private static baseUrl: string | null = null;
   protected readonly http: HttpClient = inject(HttpClient);
 
   protected abstract get controller(): string;
 
   protected buildUrl(action: string | null, ...queryParams: ((QueryParam | null) | undefined)[]): string {
+    if (ServiceBase.baseUrl === null) {
+      ServiceBase.baseUrl = `${this.configService.config.backendBaseUrl}/api`;
+    }
     let url = `${ServiceBase.baseUrl}/${this.controller}`;
     if (action) {
       url += `/${action}`;
