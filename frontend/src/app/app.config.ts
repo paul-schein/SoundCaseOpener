@@ -1,7 +1,6 @@
 import { ApplicationConfig, inject,
   provideAppInitializer, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import {provideRouter, withComponentInputBinding} from '@angular/router';
-
 import { routes } from './app.routes';
 import {provideHttpClient} from '@angular/common/http';
 import {ConfigService} from '../core/config.service';
