@@ -1,0 +1,27 @@
+<div
+  class="drop-zone border-4 border-dashed border-gray-300 rounded-2xl p-8 text-center transition-colors duration-300"
+  [class.bg-blue-50]="isDragOver()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
+>
+  <p class="text-lg font-semibold mb-4">Drag & drop files here</p>
+  <p class="text-lg font-semibold mb-2">Supported formats: MP3, WAV, OGG, M4A, AAC, FLAC</p>
+  <input type="file" (change)="onFileSelected($event)" multiple hidden #fileInput>
+  <button mat-button type="button" (click)="fileInput.click()" class="mt-2">Choose Files</button>
+</div>
+
+<div class="file-actions flex gap-4 mt-6 justify-center">
+  @if (files().length > 0) {
+    <button mat-button type="button" (click)="clearFiles()">Clear Files</button>
+    <button mat-button type="button" (click)="pushFiles()">Add to Sound-file List</button>
+  } @else {
+    <button mat-button disabled type="button">Clear Files</button>
+    <button mat-button disabled type="button">Add to Sound-file List</button>
+  }
+</div>
+<div class="list flex flex-col justify-center" style="margin-top: 1rem">
+    @for (file of files(); track file.name) {
+      <p class="text-center">{{ file.name }}</p>
+    }
+</div>
