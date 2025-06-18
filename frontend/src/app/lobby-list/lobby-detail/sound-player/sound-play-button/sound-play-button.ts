@@ -1,4 +1,4 @@
-import {Component, inject, input, InputSignal, signal, WritableSignal} from '@angular/core';
+import {Component, computed, inject, input, InputSignal, Signal, signal, WritableSignal} from '@angular/core';
 import {MatButton} from '@angular/material/button';
 import {LobbyService} from '../../../../../core/lobby.service';
 
@@ -12,14 +12,18 @@ import {LobbyService} from '../../../../../core/lobby.service';
 })
 export class SoundPlayButton {
   public readonly soundId: InputSignal<number> = input.required<number>();
-  public readonly currentCooldown: WritableSignal<number> = signal(0);
+  protected readonly currentCooldown: WritableSignal<number> = signal(0);
+  protected readonly btnDisabled: Signal<boolean> = computed(() => {
+    return this.currentCooldown() > 0;
+  });
 
   private readonly lobbyService = inject(LobbyService);
   private intervalId: number | null = null;
 
-  public async handlePlaySound(): Promise<void> {
-    await this.lobbyService.playSound(this.soundId());
-    this.startCooldown(10);
+  protected async handlePlaySound(): Promise<void> {
+    if (await this.lobbyService.playSound(this.soundId()) || true) { // remove true when sound object is available
+      this.startCooldown(10);
+    }
   }
 
   private startCooldown(seconds: number) {
