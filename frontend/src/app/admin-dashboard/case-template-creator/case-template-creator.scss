@@ -1,0 +1,18 @@
+.form-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+mat-form-field {
+  width: 100%;
+  margin: 0.5rem;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
