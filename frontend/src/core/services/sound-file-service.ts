@@ -3,7 +3,6 @@ import {ServiceBase} from './service-base';
 import { HttpStatusCode } from '@angular/common/http';
 import { z } from 'zod';
 import {firstValueFrom, lastValueFrom} from 'rxjs';
-import {SoundTemplateService} from './sound-template-service';
 
 @Injectable({
   providedIn: 'root',
