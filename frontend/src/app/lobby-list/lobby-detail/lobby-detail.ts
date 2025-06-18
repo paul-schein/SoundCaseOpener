@@ -13,11 +13,16 @@ import {Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {LobbyUserCount} from '../lobby-user-count/lobby-user-count';
 import {ConfigService} from '../../../core/config.service';
+import {SoundPlayer} from './sound-player/sound-player';
+import {NgClass} from '@angular/common';
+import {SnackbarService} from '../../../core/services/snackbar-service';
 
 @Component({
   selector: 'app-lobby-detail',
   imports: [
-    LobbyUserCount
+    LobbyUserCount,
+    SoundPlayer,
+    NgClass
   ],
   templateUrl: './lobby-detail.html',
   styleUrl: './lobby-detail.scss'
@@ -29,10 +34,12 @@ export class LobbyDetail implements OnInit, OnDestroy {
   });
   protected readonly users: WritableSignal<string[]> = signal([]);
   protected readonly lobby: WritableSignal<Lobby | null> = signal(null);
+  protected readonly usersWithSound: WritableSignal<string[]> = signal([]);
 
   private readonly configService = inject(ConfigService);
   private readonly lobbyService = inject(LobbyService);
   private readonly router: Router = inject(Router);
+  private readonly snackbar: SnackbarService = inject(SnackbarService);
   private readonly subscriptions: Subscription[] = [];
 
   protected async handleLeaveLobby(): Promise<void> {
@@ -76,6 +83,9 @@ export class LobbyDetail implements OnInit, OnDestroy {
       }),
       this.lobbyService.userPlayedSound$.subscribe(async soundPlayed => {
         await this.handleSoundPlayed(soundPlayed.username, soundPlayed.filePath);
+      }),
+      this.lobbyService.caseObtained$.subscribe(caseObtained => {
+        this.snackbar.show("You obtained a new case! You can open it in your inventory.");
       })
     );
   }
@@ -83,6 +93,12 @@ export class LobbyDetail implements OnInit, OnDestroy {
   private async handleSoundPlayed(username: string, filePath: string): Promise<void> {
     const audio = new Audio(`${this.configService.config.soundsBaseUrl}/${filePath}`);
     await audio.play();
+    if (!this.usersWithSound().includes(username)) {
+      this.usersWithSound.update(current => [...current, username]);
+      setTimeout(() => {
+        this.usersWithSound.update(current => current.filter(user => user !== username));
+      }, audio.duration * 1000);
+    }
   }
 
   public async ngOnDestroy(): Promise<void> {
