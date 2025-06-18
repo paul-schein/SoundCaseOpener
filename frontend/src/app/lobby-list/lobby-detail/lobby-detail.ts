@@ -15,6 +15,7 @@ import {LobbyUserCount} from '../lobby-user-count/lobby-user-count';
 import {ConfigService} from '../../../core/config.service';
 import {SoundPlayer} from './sound-player/sound-player';
 import {NgClass} from '@angular/common';
+import {SnackbarService} from '../../../core/services/snackbar-service';
 
 @Component({
   selector: 'app-lobby-detail',
@@ -38,6 +39,7 @@ export class LobbyDetail implements OnInit, OnDestroy {
   private readonly configService = inject(ConfigService);
   private readonly lobbyService = inject(LobbyService);
   private readonly router: Router = inject(Router);
+  private readonly snackbar: SnackbarService = inject(SnackbarService);
   private readonly subscriptions: Subscription[] = [];
 
   protected async handleLeaveLobby(): Promise<void> {
@@ -81,6 +83,9 @@ export class LobbyDetail implements OnInit, OnDestroy {
       }),
       this.lobbyService.userPlayedSound$.subscribe(async soundPlayed => {
         await this.handleSoundPlayed(soundPlayed.username, soundPlayed.filePath);
+      }),
+      this.lobbyService.caseObtained$.subscribe(caseObtained => {
+        this.snackbar.show("You obtained a new case! You can open it in your inventory.");
       })
     );
   }
