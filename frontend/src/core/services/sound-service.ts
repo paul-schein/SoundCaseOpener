@@ -28,7 +28,7 @@ export class SoundService extends ServiceBase {
   }
 }
 
-const soundZod = z.object({
+export const soundZod = z.object({
   id: z.number().int().nonnegative(),
   name: z.string().nonempty(),
   description: z.string().nonempty().max(200),
