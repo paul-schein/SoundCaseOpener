@@ -53,7 +53,7 @@
     <mat-form-field>
       <mat-label>Sound File</mat-label>
       <mat-select formControlName="soundFile">
-        @for (soundFile of soundFileList; track $index) {
+        @for (soundFile of soundFileList(); track $index) {
           <mat-option [value]="soundFile.id">{{soundFile.name}}</mat-option>
         }
       </mat-select>

@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, Signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, Signal, WritableSignal} from '@angular/core';
 import {MatError, MatFormField, MatInput, MatLabel} from '@angular/material/input';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
@@ -8,9 +8,8 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {toSignal} from '@angular/core/rxjs-interop';
 import {SnackbarService} from '../../../core/services/snackbar-service';
 import {ConfigService} from '../../../core/config.service';
-import {CaseTemplateService, NewCaseTemplate} from '../../../core/services/case-template-service';
-import {NewSoundTemplate, SoundService} from '../../../core/services/sound-service';
-import {SoundFile, SoundFileListResponse, SoundFileService} from '../../../core/services/sound-file-service';
+import {NewSoundTemplate, SoundTemplateService} from '../../../core/services/sound-template-service';
+import {SoundFile, SoundFileService} from '../../../core/services/sound-file-service';
 
 @Component({
   selector: 'app-sound-template-creator',
@@ -31,9 +30,9 @@ import {SoundFile, SoundFileListResponse, SoundFileService} from '../../../core/
 export class SoundTemplateCreator implements OnInit {
   protected configService: ConfigService = inject(ConfigService);
   protected snackbarService: SnackbarService = inject(SnackbarService);
-  protected soundService: SoundService = inject(SoundService);
+  protected soundService: SoundTemplateService = inject(SoundTemplateService);
   protected soundFileService: SoundFileService = inject(SoundFileService);
-  protected soundFileList: SoundFile[] = [];
+  protected soundFileList: WritableSignal<SoundFile[]> = signal([]);
   protected readonly RaritySchema = RaritySchema;
   protected rarityOptions: {name: string, value: string}[] = [];
   private readonly formBuilder: FormBuilder = inject(FormBuilder);
@@ -73,7 +72,7 @@ export class SoundTemplateCreator implements OnInit {
     }));
     const result = await this.soundFileService.getAllFiles();
     if (result) {
-      this.soundFileList = result.soundFiles;
+      this.soundFileList.set(result.soundFiles);
     }
   }
 
@@ -105,5 +104,6 @@ export class SoundTemplateCreator implements OnInit {
       this.formGroup.reset();
     } else {
       this.snackbarService.show("There was an error trying to add a Sound Template");
-    }  }
+    }
+  }
 }
