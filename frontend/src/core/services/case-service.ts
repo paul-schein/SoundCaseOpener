@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { RaritySchema } from '../util/zod-schemas';
 import { LoginService } from './login-service';
 import { firstValueFrom } from 'rxjs';
-import { soundZod } from './sound-service';
+import { Sound, soundZod } from './sound-service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +20,7 @@ export class CaseService extends ServiceBase {
     const url = this.buildUrl(`user/${this.loginService.currentUser()?.id}`);
     try {
       const response = await firstValueFrom(
-        this.http.get<CaseListResponse>(url, { observe: 'response' }));
+        this.http.get<AllCasesOfUserResponse>(url, { observe: 'response' }));
       return caseListResponseZod.parse(response.body).cases;
     } catch (error) {
       console.error(`Error getting cases: ${JSON.stringify(error)}`);
@@ -28,24 +28,42 @@ export class CaseService extends ServiceBase {
     }
   }
 
-  public async getCaseDetails(caseId: number): Promise<CaseDetails | null> {
-    const url = this.buildUrl(`${caseId}/details`);
+  public async getCaseById(caseId: number): Promise<Case | null> {
+    if (caseId <= 0) return null;
+
+    const url = this.buildUrl(`${caseId}`);
     try {
       const response = await firstValueFrom(
-        this.http.get<CaseDetailsResponse>(url, { observe: 'response' }));
-      return caseDetailsResponseZod.parse(response.body).caseDetails;
+        this.http.get<Case>(url, { observe: 'response' }));
+      return caseZod.parse(response.body);
     } catch (error) {
-      console.error(`Error getting case details: ${JSON.stringify(error)}`);
+      console.error(`Error getting case: ${JSON.stringify(error)}`);
       return null;
     }
   }
 
-  public async openCase(caseId: number): Promise<CaseOpeningResult | null> {
+  public async changeCaseName(caseId: number, newName: string): Promise<Case | null> {
+    if (caseId <= 0 || !newName?.trim()) return null;
+
+    const url = this.buildUrl(`${caseId}/name/${encodeURIComponent(newName)}`);
+    try {
+      const response = await firstValueFrom(
+        this.http.patch<Case>(url, null, { observe: 'response' }));
+      return caseZod.parse(response.body);
+    } catch (error) {
+      console.error(`Error changing case name: ${JSON.stringify(error)}`);
+      return null;
+    }
+  }
+
+  public async openCase(caseId: number): Promise<Sound | null> {
+    if (caseId <= 0) return null;
+
     const url = this.buildUrl(`${caseId}/open`);
     try {
       const response = await firstValueFrom(
-        this.http.post<CaseOpeningResultResponse>(url, null, { observe: 'response' }));
-      return caseOpeningResultResponseZod.parse(response.body).result;
+        this.http.post<Sound>(url, null, { observe: 'response' }));
+      return soundZod.parse(response.body);
     } catch (error) {
       console.error(`Error opening case: ${JSON.stringify(error)}`);
       return null;
@@ -54,12 +72,10 @@ export class CaseService extends ServiceBase {
 }
 
 const caseZod = z.object({
-  id: z.number().int().nonnegative(),
+  id: z.number().int().positive(),
   name: z.string().nonempty(),
   description: z.string().nonempty(),
-  rarity: RaritySchema,
-  imageUrl: z.string().nonempty(),
-  price: z.number().nonnegative()
+  rarity: RaritySchema
 });
 
 export type Case = z.infer<typeof caseZod>;
@@ -68,47 +84,11 @@ const caseListResponseZod = z.object({
   cases: caseZod.array()
 });
 
-export type CaseListResponse = z.infer<typeof caseListResponseZod>;
-
-const casePossibleRewardZod = z.object({
-  sound: soundZod,
-  dropRate: z.number().min(0).max(100)
-});
-
-export type CasePossibleReward = z.infer<typeof casePossibleRewardZod>;
-
-const caseDetailsZod = z.object({
-  case: caseZod,
-  possibleRewards: casePossibleRewardZod.array()
-});
-
-export type CaseDetails = z.infer<typeof caseDetailsZod>;
-
-const caseDetailsResponseZod = z.object({
-  caseDetails: caseDetailsZod
-});
-
-export type CaseDetailsResponse = z.infer<typeof caseDetailsResponseZod>;
-
-const caseOpeningResultZod = z.object({
-  caseId: z.number().int().nonnegative(),
-  obtainedSound: soundZod,
-  animationDuration: z.number().positive(),
-  specialEffects: z.enum(['None', 'Rare', 'Epic', 'Legendary']).optional()
-});
-
-export type CaseOpeningResult = z.infer<typeof caseOpeningResultZod>;
-
-const caseOpeningResultResponseZod = z.object({
-  result: caseOpeningResultZod
-});
-
-export type CaseOpeningResultResponse = z.infer<typeof caseOpeningResultResponseZod>;
+export type AllCasesOfUserResponse = z.infer<typeof caseListResponseZod>;
 
 export enum CaseErrorType {
-  NotFound = 'CASE_NOT_FOUND',
-  InsufficientFunds = 'INSUFFICIENT_FUNDS',
-  AlreadyOpening = 'ALREADY_OPENING_CASE',
+  NotFound = 'NOT_FOUND',
+  InvalidInput = 'INVALID_INPUT',
   ServerError = 'SERVER_ERROR'
 }
 

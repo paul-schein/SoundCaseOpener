@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, WritableSignal, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
@@ -11,7 +11,8 @@ import { Case, CaseService } from '../../../core/services/case-service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConfigService } from '../../../core/services/config-service';
-import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import {CaseOpeningStateService} from '../util/case-opening-state-service';
 
 @Component({
   selector: 'app-inventory',
@@ -32,7 +33,7 @@ import { Router } from '@angular/router';
 })
 export class InventoryComponent implements OnInit {
   private readonly configService = inject(ConfigService);
-  private readonly router = inject(Router);
+  private readonly snackBar = inject(MatSnackBar);
   private currentAudio: HTMLAudioElement | null = null;
 
   protected sounds = signal<Sound[]>([]);
@@ -40,6 +41,7 @@ export class InventoryComponent implements OnInit {
   protected filterValue = signal('');
   protected currentlyPlaying = signal<number | null>(null);
   protected selectedTab = signal(0);
+  protected isOpeningCase = signal(false);
 
   protected filteredSounds = computed(() => {
     const filter = this.filterValue().toLowerCase();
@@ -61,7 +63,8 @@ export class InventoryComponent implements OnInit {
 
   constructor(
     private soundService: SoundService,
-    private caseService: CaseService
+    private caseService: CaseService,
+    private caseOpeningState: CaseOpeningStateService
   ) {}
 
   async ngOnInit() {
@@ -77,14 +80,6 @@ export class InventoryComponent implements OnInit {
 
   private async loadCases(): Promise<void> {
     this.cases.set(await this.caseService.getAllCasesOfUser());
-    this.cases.set([{
-      id: 1,
-      name: 'Example Case',
-      description: 'This is an example case.',
-      rarity: 'Common',
-      imageUrl: 'https://example.com/case.jpg',
-      price: 10
-    }])
   }
 
   applyFilter(event: Event) {
@@ -123,11 +118,34 @@ export class InventoryComponent implements OnInit {
     }
   }
 
-  openCase(case_: Case): void {
-    this.router.navigate(['/case-opening', case_.id]);
-  }
+  async openCase(case_: Case): Promise<void> {
+    if (this.isOpeningCase()) return;
 
-  viewCaseDetails(case_: Case): void {
-    this.router.navigate(['/case-details', case_.id]);
+    try {
+      this.isOpeningCase.set(true);
+      this.caseOpeningState.startOpening(case_);
+
+      const sound = await this.caseService.openCase(case_.id);
+
+      if (sound) {
+        // Update the state with the obtained sound
+        this.caseOpeningState.setObtainedSound(sound);
+
+        // Add the new sound to the inventory after a delay
+        setTimeout(() => {
+          this.sounds.update(sounds => [...sounds, sound]);
+          this.caseOpeningState.reset();
+        }, 3000); // Show the reward for 3 seconds
+      } else {
+        this.caseOpeningState.reset();
+        this.snackBar.open('Failed to open case', 'Close', { duration: 3000 });
+      }
+    } catch (error) {
+      console.error('Error opening case:', error);
+      this.caseOpeningState.reset();
+      this.snackBar.open('Error opening case', 'Close', { duration: 3000 });
+    } finally {
+      this.isOpeningCase.set(false);
+    }
   }
 }

@@ -42,9 +42,6 @@
                   }
                 </mat-icon>
               </button>
-              <button mat-button matTooltip="More info">
-                <mat-icon>info</mat-icon>
-              </button>
             </mat-card-actions>
           </mat-card>
         } @empty {
@@ -68,27 +65,27 @@
             </mat-card-header>
 
             <mat-card-content>
-              <div class="case-image-container">
-                <img [src]="case_.imageUrl" [alt]="case_.name" class="case-image">
+              <div class="icon-container">
+                <mat-icon class="case-icon">
+                  card_giftcard
+                </mat-icon>
               </div>
               <p class="description">{{ case_.description }}</p>
-              <div class="price">
-                <mat-icon>attach_money</mat-icon>
-                <span>{{ case_.price }}</span>
-              </div>
             </mat-card-content>
 
             <mat-card-actions>
               <button mat-button
                       color="primary"
+                      [disabled]="isOpeningCase()"
                       matTooltip="Open case"
                       (click)="openCase(case_)">
-                <mat-icon>open_in_new</mat-icon>
-              </button>
-              <button mat-button
-                      matTooltip="View possible rewards"
-                      (click)="viewCaseDetails(case_)">
-                <mat-icon>info</mat-icon>
+                <mat-icon>
+                  @if (isOpeningCase()) {
+                    hourglass_empty
+                  } @else {
+                    open_in_new
+                  }
+                </mat-icon>
               </button>
             </mat-card-actions>
           </mat-card>
