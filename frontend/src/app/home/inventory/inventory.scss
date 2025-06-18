@@ -165,7 +165,6 @@
   }
 }
 
-// Add this to your existing .sound-icon styles inside .icon-container
 .icon-container {
   .sound-icon {
     &.playing {
@@ -175,14 +174,11 @@
   }
 }
 
-// Add this new animation
 @keyframes equalizer {
   0% { transform: scaleY(1); }
   50% { transform: scaleY(1.5); }
   100% { transform: scaleY(1); }
 }
-
-// Add these to your existing styles
 
 .case-image-container {
   width: 100%;
@@ -217,7 +213,6 @@
   }
 }
 
-// Ensure your rarity classes are applied to both sounds and cases
 .item-card {
   &.common {
     border: 1px solid #b0bec5;

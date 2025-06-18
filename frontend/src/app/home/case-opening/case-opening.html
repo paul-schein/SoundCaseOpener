@@ -1,34 +1,49 @@
 @if (openingState(); as state) {
   <div class="case-opening-container">
-    <div class="animation-container" [class.hide]="state.obtainedSound">
-      <div class="wave-container">
-        <svg viewBox="0 0 1000 200" preserveAspectRatio="none">
-          <path class="wave-path" [attr.d]="'M 0,100 ' + points + ' 1000,100'"/>
-          <path class="wave-path wave-path-2" [attr.d]="'M 0,100 ' + points + ' 1000,100'"/>
-          <path class="wave-path wave-path-3" [attr.d]="'M 0,100 ' + points + ' 1000,100'"/>
-        </svg>
-      </div>
-      <div class="case-info">
-        <h2>Opening {{ state.case.name }}</h2>
-        <mat-icon class="rotating">autorenew</mat-icon>
-      </div>
-    </div>
-
-    <div class="reward-container" [class.show]="state.obtainedSound">
-      @if (state.obtainedSound; as sound) {
-        <mat-card [ngClass]="sound.rarity.toLowerCase()">
-          <mat-card-header>
-            <mat-card-title>{{ sound.name }}</mat-card-title>
-            <mat-card-subtitle [ngClass]="'rarity-' + sound.rarity.toLowerCase()">
-              {{ sound.rarity }}
-            </mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <mat-icon class="reward-icon">music_note</mat-icon>
-            <p>{{ sound.description }}</p>
-          </mat-card-content>
-        </mat-card>
+    <div class="animation-area" [class.hide]="state.animationPhase === 'complete'">
+      @if (state.animationPhase !== 'complete') {
+        <div class="spinner-area">
+          <div class="spinner" [class.active]="state.animationPhase === 'spinning'"></div>
+          <div class="progress-bar-bg">
+            <div
+              class="progress-bar-fill"
+              [style.width.%]="state.progress"
+            ></div>
+          </div>
+          <div class="opening-name">
+            Opening <b>{{ state?.case?.name }}</b>
+          </div>
+          @if (state.animationPhase === 'spinning') {
+            <div class="progress-label">
+              Unlocking...
+            </div>
+          }
+          @if (state.animationPhase === 'revealing') {
+            <div class="progress-label">
+              Preparing your item...
+            </div>
+          }
+        </div>
       }
     </div>
+
+    @if (state.animationPhase === 'complete') {
+      <div class="result-area">
+        @if (state.obtainedSound; as sound) {
+          <div class="reward-reveal">
+            <mat-card [ngClass]="sound?.rarity?.toLowerCase()">
+              <mat-card-header>
+                <mat-icon>music_note</mat-icon>
+                <mat-card-title>{{ sound?.name }}</mat-card-title>
+                <mat-card-subtitle [ngClass]="'rarity-' + sound?.rarity?.toLowerCase()">{{ sound?.rarity }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <p>{{ sound?.description }}</p>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        }
+      </div>
+    }
   </div>
 }

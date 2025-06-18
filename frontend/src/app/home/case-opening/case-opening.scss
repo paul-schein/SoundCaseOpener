@@ -1,153 +1,110 @@
 .case-opening-container {
-  height: 100%;
+  min-height: 320px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  background: rgba(0, 0, 0, 0.02);
 }
 
-.animation-container {
-  text-align: center;
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
-
+.animation-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: opacity 0.5s;
   &.hide {
     opacity: 0;
-    visibility: hidden;
+    pointer-events: none;
   }
 }
 
-.wave-container {
-  width: 300px;
-  height: 200px;
-  margin: 0 auto;
+.spinner-area {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+}
+
+.spinner {
+  margin: 30px 0 18px 0;
+  width: 76px;
+  height: 76px;
+  border: 8px solid #cfd8dc;
+  border-top: 8px solid #2196f3;
+  border-radius: 50%;
+  animation: spin 1.2s linear infinite;
+  transition: box-shadow 0.2s;
+  box-shadow: 0 2px 16px rgba(33,150,243,0.10);
+  &.active {
+    box-shadow: 0 2px 28px rgba(33,150,243,0.28);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
+
+.progress-bar-bg {
+  width: 120px;
+  height: 10px;
+  background: #e0e0e0;
+  border-radius: 7px;
   overflow: hidden;
-
-  svg {
-    width: 100%;
-    height: 100%;
-  }
+  margin-bottom: 8px;
 }
 
-.wave-path {
-  fill: none;
-  stroke: rgba(var(--primary-color), 0.2);
-  stroke-width: 2;
-  animation: wave 2s linear infinite;
+.progress-bar-fill {
+  height: 10px;
+  background: linear-gradient(90deg, #42a5f5, #1976d2);
+  width: 0%;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.wave-path-2 {
-  stroke: rgba(var(--primary-color), 0.4);
-  animation-delay: -0.5s;
+.opening-name {
+  font-size: 18px;
+  color: #1976d2;
+  margin-bottom: 5px;
+  letter-spacing: 0.03em;
 }
 
-.wave-path-3 {
-  stroke: rgba(var(--primary-color), 0.6);
-  animation-delay: -1s;
+.progress-label {
+  font-size: 15px;
+  color: #555;
+  margin-bottom: 4px;
+  margin-top: 3px;
+  min-height: 22px;
+  letter-spacing: 0.02em;
+  opacity: 0.86;
 }
 
-@keyframes wave {
+.result-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  animation: fadeIn 1s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 180px;
+}
+
+.reward-reveal {
+  animation: popIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes popIn {
   0% {
-    transform: translateX(0) translateY(0);
+    opacity: 0;
+    transform: translateY(40px) scale(0.92);
   }
-  50% {
-    transform: translateX(-30%) translateY(10px);
+  70% {
+    opacity: 1;
+    transform: translateY(-7px) scale(1.07);
   }
   100% {
-    transform: translateX(-100%) translateY(0);
-  }
-}
-
-.case-info {
-  margin-top: 2rem;
-
-  h2 {
-    margin-bottom: 1rem;
-  }
-
-  .rotating {
-    font-size: 2rem;
-    animation: rotate 2s linear infinite;
-  }
-}
-
-.reward-container {
-  max-width: 400px;
-  width: 100%;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
-  position: absolute;
-
-  &.show {
     opacity: 1;
-    visibility: visible;
-    animation: slide-up 0.5s ease-out forwards;
+    transform: translateY(0) scale(1);
   }
-
-  mat-card {
-    padding: 2rem;
-    text-align: center;
-  }
-
-  .reward-icon {
-    font-size: 4rem;
-    width: 4rem;
-    height: 4rem;
-    margin: 2rem 0;
-    color: rgba(0, 0, 0, 0.54);
-  }
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes slide-up {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-:root {
-  --rarity-common: rgb(176, 190, 197);
-  --rarity-uncommon: rgb(129, 199, 132);
-  --rarity-rare: rgb(100, 181, 246);
-  --rarity-epic: rgb(186, 104, 200);
-  --rarity-legendary: rgb(255, 215, 0);
-}
-
-.common {
-  border-color: var(--rarity-common);
-}
-
-.uncommon {
-  border-color: var(--rarity-uncommon);
-}
-
-.rare {
-  border-color: var(--rarity-rare);
-}
-
-.epic {
-  border-color: var(--rarity-epic);
-}
-
-.legendary {
-  border-color: var(--rarity-legendary);
 }

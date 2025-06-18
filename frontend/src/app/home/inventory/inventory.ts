@@ -128,14 +128,12 @@ export class InventoryComponent implements OnInit {
       const sound = await this.caseService.openCase(case_.id);
 
       if (sound) {
-        // Update the state with the obtained sound
         this.caseOpeningState.setObtainedSound(sound);
 
-        // Add the new sound to the inventory after a delay
         setTimeout(() => {
           this.sounds.update(sounds => [...sounds, sound]);
           this.caseOpeningState.reset();
-        }, 3000); // Show the reward for 3 seconds
+        }, 3000)
       } else {
         this.caseOpeningState.reset();
         this.snackBar.open('Failed to open case', 'Close', { duration: 3000 });
