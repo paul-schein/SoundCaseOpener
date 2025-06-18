@@ -1,9 +1,10 @@
 import {Directive, inject} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
+import {ConfigService} from '../config.service';
 
 @Directive()
 export abstract class ServiceBase {
-  private static readonly baseUrl: string = 'http://localhost:5101/api';
+  private static readonly baseUrl: string = 'http://localhost:5200/api';
   protected readonly http: HttpClient = inject(HttpClient);
 
   protected abstract get controller(): string;

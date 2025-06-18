@@ -2,7 +2,8 @@ import {Injectable} from '@angular/core';
 import {ServiceBase} from './service-base';
 import { HttpStatusCode } from '@angular/common/http';
 import { z } from 'zod';
-import {lastValueFrom} from 'rxjs';
+import {firstValueFrom, lastValueFrom} from 'rxjs';
+import {SoundService} from './sound-service';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +11,19 @@ import {lastValueFrom} from 'rxjs';
 export class SoundFileService extends ServiceBase {
   protected override get controller(): string {
     return 'sound-files';
+  }
+
+  public async getAllFiles(): Promise<SoundFileListResponse | undefined> {
+    const url = this.buildUrl(null);
+    try {
+      const response = await firstValueFrom(this.http.get<SoundFileListResponse>(url, { observe: "response" }));
+
+      const data = soundFileListSchemaResponse.parse(response.body);
+      return data as SoundFileListResponse;
+    } catch (error) {
+      console.log(`Error getting soundFiles: ${JSON.stringify(error)}`);
+      return undefined;
+    }
   }
 
   private async uploadSingleFile(file: File): Promise<UploadResult> {
@@ -76,8 +90,8 @@ const fileSchema = z.custom<File>((file) => file instanceof File, {
 });
 
 const soundFileSchema = fileSchema.refine(
-  (file) => file.size <= 24 * 1024 * 1024,
-  { message: 'Audio file size must be less than 24MB' }
+  (file) => file.size <= 48 * 1024 * 1024,
+  { message: 'Audio file size must be less than 48MB' }
 ).refine(
   (file) => [
     'audio/mpeg', 'audio/mp3', 'audio/wav',
@@ -86,6 +100,20 @@ const soundFileSchema = fileSchema.refine(
   ].includes(file.type),
   { message: 'File must be a valid audio format (MP3, WAV, OGG, M4A, AAC, FLAC)' }
 );
+
+const soundFileSchemaResponse = z.object({
+  id: z.number().nonnegative(),
+  name: z.string().min(1),
+  filePath: z.string().min(1),
+})
+
+export type SoundFile = z.infer<typeof soundFileSchemaResponse>;
+
+const soundFileListSchemaResponse = z.object({
+  soundFiles: soundFileSchemaResponse.array(),
+});
+
+export type SoundFileListResponse = z.infer<typeof soundFileListSchemaResponse>;
 
 export class UploadResult {
   constructor(private readonly statusCode: number) {
