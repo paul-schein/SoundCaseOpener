@@ -19,11 +19,12 @@ export class ConfigService {
 
   public async loadConfig(): Promise<void> {
     const response: any = await firstValueFrom(this.httpClient.get('/app-config.json'));
-    this.appConfig = new Config(response.backendBaseUrl);
+    this.appConfig = new Config(response.backendBaseUrl, response.soundsBaseUrl);
   }
 }
 
 export class Config {
-  constructor(public readonly backendBaseUrl: string) {
+  constructor(public readonly backendBaseUrl: string,
+              public readonly soundsBaseUrl: string) {
   }
 }

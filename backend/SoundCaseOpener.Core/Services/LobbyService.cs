@@ -27,7 +27,7 @@ public interface ILobbyService
             Success<UsersSoundPlayed>, 
             SuccessCaseObtained,
             NotFound, NotAllowed>> 
-        PlaySoundAsync(int soundId);
+        PlaySoundAsync(int soundId, string connectionId);
     public ValueTask<OneOf<Lobby, NotFound>> GetLobbyByIdAsync(string lobbyId);
     
     public readonly record struct NotAllowed;
@@ -201,7 +201,7 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
 
     public async ValueTask<OneOf<Success<ILobbyService.UsersSoundPlayed>, 
             ILobbyService.SuccessCaseObtained,
-            NotFound, ILobbyService.NotAllowed>> PlaySoundAsync(int soundId)
+            NotFound, ILobbyService.NotAllowed>> PlaySoundAsync(int soundId, string connectionId)
     {
         IUnitOfWork uow = GetUnitOfWork();
         Sound? sound = await uow.SoundRepository.GetByIdAsync(soundId, true);
@@ -225,6 +225,19 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
             {
                 logger.LogWarning("Owner with id {UserId} is not in any lobby", sound.OwnerId);
                 return new NotFound();
+            }
+
+            if (!_connectionUsers.TryGetValue(connectionId, out int userId))
+            {
+                logger.LogWarning("Connection {ConnectionId} is not associated with any user", connectionId);
+                return new ILobbyService.NotAllowed();
+            }
+            
+            if (sound.OwnerId != userId)
+            {
+                logger.LogWarning("User {Username} is not the owner of sound with id {SoundId}", 
+                                  _connections[connectionId], soundId);
+                return new ILobbyService.NotAllowed();
             }
             
             sound.LastTimeUsed = clock.GetCurrentInstant();

@@ -12,6 +12,7 @@ import {Lobby, LobbyService} from '../../../core/lobby.service';
 import {Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {LobbyUserCount} from '../lobby-user-count/lobby-user-count';
+import {ConfigService} from '../../../core/config.service';
 
 @Component({
   selector: 'app-lobby-detail',
@@ -22,13 +23,14 @@ import {LobbyUserCount} from '../lobby-user-count/lobby-user-count';
   styleUrl: './lobby-detail.scss'
 })
 export class LobbyDetail implements OnInit, OnDestroy {
-  public lobbyId: InputSignal<string> = input.required<string>();
-  public isCreator: InputSignalWithTransform<boolean, string> = input(false, {
+  public readonly lobbyId: InputSignal<string> = input.required<string>();
+  public readonly isCreator: InputSignalWithTransform<boolean, string> = input(false, {
     transform: (value: string) => value === 'true'
   });
-  protected users: WritableSignal<string[]> = signal([]);
-  protected lobby: WritableSignal<Lobby | null> = signal(null);
+  protected readonly users: WritableSignal<string[]> = signal([]);
+  protected readonly lobby: WritableSignal<Lobby | null> = signal(null);
 
+  private readonly configService = inject(ConfigService);
   private readonly lobbyService = inject(LobbyService);
   private readonly router: Router = inject(Router);
   private readonly subscriptions: Subscription[] = [];
@@ -71,8 +73,16 @@ export class LobbyDetail implements OnInit, OnDestroy {
           }
           return lobby;
         });
+      }),
+      this.lobbyService.userPlayedSound$.subscribe(async soundPlayed => {
+        await this.handleSoundPlayed(soundPlayed.username, soundPlayed.filePath);
       })
     );
+  }
+
+  private async handleSoundPlayed(username: string, filePath: string): Promise<void> {
+    const audio = new Audio(`${this.configService.config.soundsBaseUrl}/${filePath}`);
+    await audio.play();
   }
 
   public async ngOnDestroy(): Promise<void> {

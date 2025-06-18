@@ -123,7 +123,7 @@ public sealed class LobbyHub(ILobbyService lobbyService,
             OneOf<Success<ILobbyService.UsersSoundPlayed>,
                 ILobbyService.SuccessCaseObtained,
                 NotFound, ILobbyService.NotAllowed> result = 
-                await lobbyService.PlaySoundAsync(soundId);
+                await lobbyService.PlaySoundAsync(soundId, Context.ConnectionId);
             
             return result.Match<bool>(
                 success =>

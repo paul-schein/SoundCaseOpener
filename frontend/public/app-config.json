@@ -1,3 +1,4 @@
 ﻿{
-  "backendBaseUrl": "http://localhost:5200"
+  "backendBaseUrl": "http://localhost:5200",
+  "soundsBaseUrl": "http://localhost:5102"
 }
