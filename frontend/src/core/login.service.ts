@@ -3,6 +3,7 @@ import {HttpClient, HttpErrorResponse, HttpStatusCode} from '@angular/common/htt
 import {ConfigService} from './config.service';
 import {z} from 'zod';
 import {firstValueFrom} from 'rxjs';
+import {RoleSchema} from './util/zod-schemas';
 
 @Injectable({
   providedIn: 'root'
@@ -71,11 +72,10 @@ export class LoginService {
   }
 }
 
-
 const userZod = z.object({
   id: z.number().int().positive(),
   username: z.string(),
-  role: z.enum(['User', 'Admin'])
+  role: RoleSchema
 });
 
 export type User = z.infer<typeof userZod>;

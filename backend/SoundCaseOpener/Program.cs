@@ -4,8 +4,11 @@ using SoundCaseOpener;
 using SoundCaseOpener.Shared;
 using SoundCaseOpener.Util;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using NodaTime.Serialization.SystemTextJson;
+using SoundCaseOpener.Core.Util;
 using SoundCaseOpener.Hubs;
+using SoundCaseOpener.Persistence.Util;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +38,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+await ImportSeedDataIfNotExists(app);
+
 await app.RunAsync();
 
 return;
@@ -43,6 +48,29 @@ static void ConfigureJsonSerialization(JsonOptions options, bool isDev)
 {
     JsonConfig.ConfigureJsonSerialization(options.JsonSerializerOptions, isDev);
 }
+
+static async Task ImportSeedDataIfNotExists(IHost app)
+{
+    if (Environment.GetEnvironmentVariable("INT_TESTING") is not null)
+    {
+        return;
+    }
+
+    using var scope = app.Services.CreateScope();
+    await using var context = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+    IOptions<Settings> settings = scope.ServiceProvider.GetRequiredService<IOptions<Settings>>();
+    ILogger<Program> logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    bool seedDataInserted = await Seeder.ImportSeedDataAsync(context, settings.Value);
+    if (seedDataInserted)
+    {
+        logger.LogInformation("Initial seed data inserted");
+    }
+    else
+    {
+        logger.LogInformation("Initial seed data already present");
+    }
+}
+
 
 // used for integration testing
 public partial class Program { }
