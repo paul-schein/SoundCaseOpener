@@ -53,7 +53,12 @@ export class LoginService {
     if (userJson) {
       try {
         const username: string = userZod.parse(JSON.parse(userJson)).username;
-        this.currentUser.set(await this.getUserByUsername(username));
+        const user: User | null = await this.getUserByUsername(username);
+        if (user === null) {
+          localStorage.removeItem('user');
+          return false;
+        }
+        this.currentUser.set(user);
 
         return true;
       } catch (error) {
