@@ -82,7 +82,7 @@ public class CaseTemplateController(ICaseTemplateService caseTemplateService,
     
     [HttpPost]
     [Route("add-item-template")]
-    [ProducesResponseType<CaseTemplateDto>(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
