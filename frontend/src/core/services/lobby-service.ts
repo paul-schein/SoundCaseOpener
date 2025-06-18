@@ -14,7 +14,9 @@ export class LobbyService {
   private initialized: boolean = false;
   private initializing: boolean = false;
   private connection: signalR.HubConnection = new signalR.HubConnectionBuilder()
-    .withUrl(`${this.configService.config.backendBaseUrl}/hub/lobby`)
+    .withUrl(`${this.configService.config.backendBaseUrl}/hub/lobby`, {
+      transport: signalR.HttpTransportType.LongPolling
+    })
     .build();
 
   private readonly lobbyCreatedSubject = new Subject<Lobby>();
@@ -88,7 +90,6 @@ export class LobbyService {
   }
 
   public async getUsersInLobby(lobbyId: string): Promise<string[]> {
-    console.log(lobbyId);
     const data = await this.connection.invoke<any>('GetUsersInLobbyAsync', lobbyId);
     return userListZod.parse(data);
   }
