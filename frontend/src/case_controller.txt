@@ -1,0 +1,151 @@
+using Microsoft.AspNetCore.Mvc;
+using OneOf;
+using OneOf.Types;
+using SoundCaseOpener.Core.Services;
+using SoundCaseOpener.Persistence.Model;
+using SoundCaseOpener.Persistence.Util;
+using SoundCaseOpener.Shared;
+using SoundCaseOpener.Util;
+
+namespace SoundCaseOpener.Controllers;
+
+[Route("api/cases")]
+public class CaseController(ICaseService caseService,
+                            ITransactionProvider transaction,
+                            ILogger<CaseController> logger) : BaseController
+{
+    [HttpGet]
+    [Route("{id:int}")]
+    [ProducesResponseType<CaseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async ValueTask<ActionResult<CaseDto>> GetCaseByIdAsync([FromRoute] int id)
+    {
+        if (id <= 0)
+        {
+            logger.LogInformation("Invalid case id: {Id}", id);
+            return BadRequest();
+        }
+
+        OneOf<Case, NotFound> result = await caseService.GetCaseByIdAsync(id);
+
+        return result.Match<ActionResult<CaseDto>>(
+                    success => Ok(CaseDto.FromCase(success)),
+                    notFound => NotFound());
+    }
+
+    [HttpGet]
+    [Route("user/{userId:int}")]
+    [ProducesResponseType<AllCasesOfUserResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async ValueTask<ActionResult<AllCasesOfUserResponse>> GetAllCasesOfUserAsync([FromRoute] int userId)
+    {
+        if (userId <= 0)
+        {
+            logger.LogInformation("Invalid user id: {UserId}", userId);
+            return BadRequest();
+        }
+
+        OneOf<Success<IReadOnlyCollection<Case>>, NotFound> result =
+            await caseService.GetAllCasesOfUserAsync(userId);
+
+        return result.Match<ActionResult<AllCasesOfUserResponse>>(
+                    success => Ok(new AllCasesOfUserResponse(success.Value.Select(CaseDto.FromCase).ToList())),
+                    notFound => NotFound());
+    }
+
+    [HttpPatch]
+    [Route("{id:int}/name/{newName}")]
+    [ProducesResponseType<CaseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async ValueTask<ActionResult<CaseDto>> ChangeCaseNameAsync([FromRoute] int id,
+                                                                       [FromRoute] string newName)
+    {
+        if (id <= 0 || string.IsNullOrWhiteSpace(newName) || newName.Length > Const.MaxItemNameLength)
+        {
+            logger.LogInformation("Invalid case id or name: {Id}, {NewName}", id, newName);
+            return BadRequest();
+        }
+
+        try
+        {
+            await transaction.BeginTransactionAsync();
+
+            OneOf<Success<Case>, NotFound> result = await caseService.ChangeCaseNameAsync(id, newName);
+            return await result.Match<ValueTask<ActionResult<CaseDto>>>(
+                async success =>
+                {
+                    await transaction.CommitAsync();
+                    return Ok(CaseDto.FromCase(success.Value));
+                },
+                async notFound =>
+                {
+                    await transaction.RollbackAsync();
+                    return NotFound();
+                });
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(e, "Error while changing case name for id {Id} to {NewName}", id, newName);
+            return Problem();
+        }
+    }
+
+    [HttpPost]
+    [Route("{id:int}/open")]
+    [ProducesResponseType<SoundDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async ValueTask<ActionResult<SoundDto>> OpenCaseAsync([FromRoute] int id)
+    {
+        if (id <= 0)
+        {
+            logger.LogInformation("Invalid case id: {Id}", id);
+            return BadRequest();
+        }
+
+        try
+        {
+            await transaction.BeginTransactionAsync();
+
+            OneOf<Success<Sound>, ICaseService.Empty, NotFound> result = await caseService.OpenCaseAsync(id);
+            return await result.Match<ValueTask<ActionResult<SoundDto>>>(
+                async success =>
+                {
+                    await transaction.CommitAsync();
+                    return Ok(SoundDto.FromSound(success.Value));
+                },
+                async empty =>
+                {
+                    await transaction.CommitAsync();
+                    return NoContent();
+                },
+                async notFound =>
+                {
+                    await transaction.RollbackAsync();
+                    return NotFound();
+                });
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync();
+            logger.LogError(e, "Error while opening case with id {Id}", id);
+            return Problem();
+        }
+    }
+}
+
+public sealed record AllCasesOfUserResponse(IReadOnlyCollection<CaseDto> Cases);
+
+public sealed record CaseDto(int Id, string Name, string Description, Rarity Rarity)
+{
+    public static CaseDto FromCase(Case caseItem) =>
+        new(caseItem.Id,
+            caseItem.Name,
+            caseItem.Template.Description,
+            caseItem.Template.Rarity);
+}

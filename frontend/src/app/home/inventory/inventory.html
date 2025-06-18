@@ -1,0 +1,101 @@
+<div class="inventory-container">
+  <mat-form-field>
+    <mat-label>Filter</mat-label>
+    <input matInput (keyup)="applyFilter($event)" placeholder="Search items..." #input>
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <mat-tab-group [(selectedIndex)]="selectedTab">
+    <mat-tab label="Sounds">
+      <div class="card-grid">
+        @for (sound of filteredSounds(); track sound.id) {
+          <mat-card class="item-card" [ngClass]="sound.rarity.toLowerCase()">
+            <mat-card-header>
+              <mat-card-title>{{ sound.name }}</mat-card-title>
+              <mat-card-subtitle [ngClass]="'rarity-' + sound.rarity.toLowerCase()">
+                {{ sound.rarity }}
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="icon-container">
+                <mat-icon class="sound-icon" [class.playing]="currentlyPlaying() === sound.id">
+                  graphic_eq
+                </mat-icon>
+              </div>
+              <p class="description">{{ sound.description }}</p>
+              <div class="cooldown">
+                <mat-icon>timer</mat-icon>
+                <span>{{ sound.cooldown }}s</span>
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button mat-button
+                      matTooltip="{{ currentlyPlaying() === sound.id ? 'Stop sound' : 'Preview sound' }}"
+                      (click)="toggleSound(sound)">
+                <mat-icon>
+                  @if (currentlyPlaying() === sound.id) {
+                    stop_circle
+                  } @else {
+                    play_circle
+                  }
+                </mat-icon>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        } @empty {
+          <div class="no-items">
+            <mat-icon>search_off</mat-icon>
+            <p>No sounds found</p>
+          </div>
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Cases">
+      <div class="card-grid">
+        @for (case_ of filteredCases(); track case_.id) {
+          <mat-card class="item-card" [ngClass]="case_.rarity.toLowerCase()">
+            <mat-card-header>
+              <mat-card-title>{{ case_.name }}</mat-card-title>
+              <mat-card-subtitle [ngClass]="'rarity-' + case_.rarity.toLowerCase()">
+                {{ case_.rarity }}
+              </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="icon-container">
+                <mat-icon class="case-icon">
+                  card_giftcard
+                </mat-icon>
+              </div>
+              <p class="description">{{ case_.description }}</p>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button mat-button
+                      color="primary"
+                      [disabled]="isOpeningCase()"
+                      matTooltip="Open case"
+                      (click)="openCase(case_)">
+                <mat-icon>
+                  @if (isOpeningCase()) {
+                    hourglass_empty
+                  } @else {
+                    open_in_new
+                  }
+                </mat-icon>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        } @empty {
+          <div class="no-items">
+            <mat-icon>search_off</mat-icon>
+            <p>No cases found</p>
+          </div>
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
