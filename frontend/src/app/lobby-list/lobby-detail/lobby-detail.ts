@@ -8,11 +8,11 @@ import {
   OnInit, signal,
   WritableSignal
 } from '@angular/core';
-import {Lobby, LobbyService} from '../../../core/lobby.service';
+import {Lobby, LobbyService} from '../../../core/services/lobby-service';
 import {Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {LobbyUserCount} from '../lobby-user-count/lobby-user-count';
-import {ConfigService} from '../../../core/config.service';
+import {ConfigService} from '../../../core/services/config-service';
 import {SoundPlayer} from './sound-player/sound-player';
 import {NgClass} from '@angular/common';
 import {SnackbarService} from '../../../core/services/snackbar-service';

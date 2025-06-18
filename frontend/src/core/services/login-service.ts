@@ -1,9 +1,9 @@
 import {inject, Injectable, signal, WritableSignal} from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpStatusCode} from '@angular/common/http';
-import {ConfigService} from './config.service';
+import {ConfigService} from './config-service';
 import {z} from 'zod';
 import {firstValueFrom} from 'rxjs';
-import {RoleSchema} from './util/zod-schemas';
+import {RoleSchema} from '../util/zod-schemas';
 
 @Injectable({
   providedIn: 'root'

@@ -1,6 +1,6 @@
 import {Component, computed, inject, input, InputSignal, Signal, signal, WritableSignal} from '@angular/core';
 import {MatButton} from '@angular/material/button';
-import {LobbyService} from '../../../../../core/lobby.service';
+import {LobbyService} from '../../../../../core/services/lobby-service';
 
 @Component({
   selector: 'app-sound-play-button',

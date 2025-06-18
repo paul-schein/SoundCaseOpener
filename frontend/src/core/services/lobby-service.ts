@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
-import {ConfigService} from './config.service';
-import {LoginService} from './login.service';
+import {ConfigService} from './config-service';
+import {LoginService} from './login-service';
 import * as signalR from '@microsoft/signalr';
 import {z} from 'zod';
 import {Subject} from 'rxjs';

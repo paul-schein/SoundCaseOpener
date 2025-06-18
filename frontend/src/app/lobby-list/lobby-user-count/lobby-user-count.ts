@@ -1,5 +1,5 @@
 import {Component, input, InputSignal} from '@angular/core';
-import {Lobby} from '../../../core/lobby.service';
+import {Lobby} from '../../../core/services/lobby-service';
 import {MatIcon} from '@angular/material/icon';
 
 @Component({

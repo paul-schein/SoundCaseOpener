@@ -7,9 +7,8 @@ import {MatButton} from '@angular/material/button';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {SnackbarService} from '../../../core/services/snackbar-service';
-import {ConfigService} from '../../../core/config.service';
-import {CaseTemplateService, NewCaseTemplate} from '../../../core/services/case-template-service';
-import {NewSoundTemplate, SoundService} from '../../../core/services/sound-service';
+import {ConfigService} from '../../../core/services/config-service';
+import {NewSoundTemplate, SoundTemplateService} from '../../../core/services/sound-template-service';
 import {SoundFile, SoundFileListResponse, SoundFileService} from '../../../core/services/sound-file-service';
 
 @Component({
@@ -31,7 +30,7 @@ import {SoundFile, SoundFileListResponse, SoundFileService} from '../../../core/
 export class SoundTemplateCreator implements OnInit {
   protected configService: ConfigService = inject(ConfigService);
   protected snackbarService: SnackbarService = inject(SnackbarService);
-  protected soundService: SoundService = inject(SoundService);
+  protected soundService: SoundTemplateService = inject(SoundTemplateService);
   protected soundFileService: SoundFileService = inject(SoundFileService);
   protected soundFileList: SoundFile[] = [];
   protected readonly RaritySchema = RaritySchema;

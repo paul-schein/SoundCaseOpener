@@ -2,7 +2,7 @@ import {Component, inject, OnInit, signal, WritableSignal} from '@angular/core';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatFormField, MatInput, MatLabel, MatError} from '@angular/material/input';
 import {MatButton} from '@angular/material/button';
-import {LoginService, User} from '../../core/login.service';
+import {LoginService, User} from '../../core/services/login-service';
 import {Router} from '@angular/router';
 
 @Component({

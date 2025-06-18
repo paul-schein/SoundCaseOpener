@@ -1,6 +1,6 @@
 import {Directive, inject} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {ConfigService} from '../config.service';
+import {ConfigService} from './config-service';
 
 @Directive()
 export abstract class ServiceBase {

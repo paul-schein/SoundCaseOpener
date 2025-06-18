@@ -1,14 +1,13 @@
-import {inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {ServiceBase} from './service-base';
 import {z} from 'zod';
-import {ConfigService} from '../config.service';
 import {RaritySchema} from '../util/zod-schemas';
 import {lastValueFrom} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
-export class SoundService extends ServiceBase {
+export class SoundTemplateService extends ServiceBase {
 
   protected override get controller(): string {
     return 'sound-templates';

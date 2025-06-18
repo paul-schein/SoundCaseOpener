@@ -1,5 +1,5 @@
 import {Component, computed, inject, Signal} from '@angular/core';
-import {LoginService} from '../../core/login.service';
+import {LoginService} from '../../core/services/login-service';
 import {Router, RouterLink} from '@angular/router';
 import {MatButton} from '@angular/material/button';
 
