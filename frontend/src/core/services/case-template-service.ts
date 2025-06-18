@@ -9,7 +9,6 @@ import {lastValueFrom} from 'rxjs';
   providedIn: 'root'
 })
 export class CaseTemplateService extends ServiceBase {
-  protected readonly configService: ConfigService = inject(ConfigService);
 
   protected override get controller(): string {
     return 'case-templates';
