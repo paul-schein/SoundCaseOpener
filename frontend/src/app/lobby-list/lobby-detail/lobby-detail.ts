@@ -13,11 +13,13 @@ import {Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {LobbyUserCount} from '../lobby-user-count/lobby-user-count';
 import {ConfigService} from '../../../core/config.service';
+import {SoundPlayer} from './sound-player/sound-player';
 
 @Component({
   selector: 'app-lobby-detail',
   imports: [
-    LobbyUserCount
+    LobbyUserCount,
+    SoundPlayer
   ],
   templateUrl: './lobby-detail.html',
   styleUrl: './lobby-detail.scss'
