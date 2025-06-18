@@ -1,6 +1,6 @@
 import {Component, inject, signal, WritableSignal} from '@angular/core';
 import {MatButton} from '@angular/material/button';
-import {SoundFileService} from '../../../core/services/sound-file.service';
+import {SoundFileService} from '../../../core/services/sound-file-service';
 
 @Component({
   selector: 'app-file-upload',

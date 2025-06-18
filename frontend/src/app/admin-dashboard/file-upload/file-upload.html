@@ -5,7 +5,8 @@
   (dragleave)="onDragLeave($event)"
   (drop)="onDrop($event)"
 >
-  <p class="text-lg font-semibold text-gray-600 mb-4">Drag & drop files here</p>
+  <p class="text-lg font-semibold mb-4">Drag & drop files here</p>
+  <p class="text-lg font-semibold mb-2">Supported formats: MP3, WAV, OGG, M4A, AAC, FLAC</p>
   <input type="file" (change)="onFileSelected($event)" multiple hidden #fileInput>
   <button mat-button type="button" (click)="fileInput.click()" class="mt-2">Choose Files</button>
 </div>
@@ -19,9 +20,9 @@
     <button mat-button disabled type="button">Add to Sound-file List</button>
   }
 </div>
+<div class="list">
+    @for (file of files(); track file.name) {
+      <p>{{ file.name }}</p>
+    }
+</div>
 
-<ul class="mt-6 list-disc list-inside text-gray-700 max-w-md mx-auto">
-  @for (file of files(); track file.name) {
-    <li>{{ file.name }}</li>
-  }
-</ul>
