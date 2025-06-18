@@ -13,13 +13,13 @@ export class SoundFileService extends ServiceBase {
     return 'sound-files';
   }
 
-  public async getAllFiles(): Promise<SoundFile[] | undefined> {
+  public async getAllFiles(): Promise<SoundFileListResponse | undefined> {
     const url = this.buildUrl(null);
     try {
       const response = await firstValueFrom(this.http.get<SoundFileListResponse>(url, { observe: "response" }));
 
       const data = soundFileListSchemaResponse.parse(response.body);
-      return data as unknown as SoundFile[];
+      return data as SoundFileListResponse;
     } catch (error) {
       console.log(`Error getting soundFiles: ${JSON.stringify(error)}`);
       return undefined;
@@ -101,15 +101,16 @@ const soundFileSchema = fileSchema.refine(
   { message: 'File must be a valid audio format (MP3, WAV, OGG, M4A, AAC, FLAC)' }
 );
 
-export type SoundFile = z.infer<typeof soundFileSchema>;
-
 const soundFileSchemaResponse = z.object({
+  id: z.number().nonnegative(),
   name: z.string().min(1),
-
+  filePath: z.string().min(1),
 })
 
+export type SoundFile = z.infer<typeof soundFileSchemaResponse>;
+
 const soundFileListSchemaResponse = z.object({
-  items: soundFileSchemaResponse.array(),
+  soundFiles: soundFileSchemaResponse.array(),
 });
 
 export type SoundFileListResponse = z.infer<typeof soundFileListSchemaResponse>;

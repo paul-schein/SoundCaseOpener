@@ -4,11 +4,13 @@ import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { Rarity, RaritySchema } from '../../../core/util/zod-schemas';
 import {MatButton} from '@angular/material/button';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {SnackbarService} from '../../../core/services/snackbar-service';
 import {ConfigService} from '../../../core/config.service';
 import {CaseTemplateService, NewCaseTemplate} from '../../../core/services/case-template-service';
+import {NewSoundTemplate, SoundService} from '../../../core/services/sound-service';
+import {SoundFile, SoundFileListResponse, SoundFileService} from '../../../core/services/sound-file-service';
 
 @Component({
   selector: 'app-sound-template-creator',
@@ -26,10 +28,12 @@ import {CaseTemplateService, NewCaseTemplate} from '../../../core/services/case-
   templateUrl: './sound-template-creator.html',
   styleUrl: './sound-template-creator.scss'
 })
-export class SoundTemplateCreator {
+export class SoundTemplateCreator implements OnInit {
   protected configService: ConfigService = inject(ConfigService);
   protected snackbarService: SnackbarService = inject(SnackbarService);
-  protected caseTemplateService: CaseTemplateService = inject(CaseTemplateService);
+  protected soundService: SoundService = inject(SoundService);
+  protected soundFileService: SoundFileService = inject(SoundFileService);
+  protected soundFileList: SoundFile[] = [];
   protected readonly RaritySchema = RaritySchema;
   protected rarityOptions: {name: string, value: string}[] = [];
   private readonly formBuilder: FormBuilder = inject(FormBuilder);
@@ -37,6 +41,9 @@ export class SoundTemplateCreator {
     name: ['', [Validators.required, Validators.minLength(this.configService.config.nameMinLength)]],
     description: ['', [Validators.required, Validators.maxLength(this.configService.config.descriptionMaxLength)]],
     rarity: ['', [Validators.required]],
+    minCooldown: [0, [Validators.required, Validators.pattern(/^[0-9]+(\.[0-9]+)?$/)]],
+    maxCooldown: [0, [Validators.required, Validators.pattern(/^[0-9]+(\.[0-9]+)?$/)]],
+    soundFile: [0, [Validators.required]],
   });
 
   private readonly formUpdatedSignal: Signal<void> = toSignal(this.formGroup.valueChanges);
@@ -45,33 +52,58 @@ export class SoundTemplateCreator {
     return this.formGroup.valid;
   });
 
-  ngOnInit() {
+  protected readonly minCooldownValue = computed(() => {
+    this.formUpdatedSignal();
+    return Number(this.formGroup.get('minCooldown')?.value || 0);
+  });
+
+  protected readonly maxCooldownValue = computed(() => {
+    this.formUpdatedSignal();
+    return Number(this.formGroup.get('maxCooldown')?.value || 0);
+  });
+
+  protected readonly isCooldownValid = computed(() => {
+    return this.maxCooldownValue() >= this.minCooldownValue();
+  });
+
+  public async ngOnInit() {
     this.rarityOptions = Object.values(RaritySchema.enum).map(value => ({
       name: value,
       value: value
     }));
+    const result = await this.soundFileService.getAllFiles();
+    if (result) {
+      this.soundFileList = result.soundFiles;
+    }
   }
 
-  public async addCaseTemplate() {
+  public async addSoundTemplate() {
     if (!this.formGroup.valid) {
       this.snackbarService.show("Please fill all required fields correctly");
       return;
     }
 
     const formValues = this.formGroup.value;
+    if (!this.isCooldownValid()) {
+      this.snackbarService.show("Maximum cooldown can't be smaller than the minimum cooldown");
+      return;
+    }
 
-    const newCaseTemplate: NewCaseTemplate = {
+    const newSoundTemplate: NewSoundTemplate = {
       name: formValues.name as string,
       description: formValues.description as string,
-      rarity: formValues.rarity as unknown as Rarity
+      rarity: formValues.rarity as Rarity,
+      minCooldown: formValues.minCooldown as number,
+      maxCooldown: formValues.minCooldown as number,
+      soundFileId: formValues.soundFile as number
     };
 
-    const result = await this.caseTemplateService.addCaseTemplate(newCaseTemplate);
+    const result = await this.soundService.addSoundTemplate(newSoundTemplate);
 
     if (result) {
-      this.snackbarService.show("Case Template successfully added");
+      this.snackbarService.show("Sound Template successfully added");
       this.formGroup.reset();
     } else {
-      this.snackbarService.show("There was an error trying to add a Case Template");
+      this.snackbarService.show("There was an error trying to add a Sound Template");
     }  }
 }

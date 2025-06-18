@@ -29,8 +29,41 @@
         <mat-error>Rarity is required.</mat-error>
       }
     </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Minimum Cooldown</mat-label>
+      <input matInput formControlName="minCooldown"/>
+      @if (formGroup.get('minCooldown')?.hasError('required')) {
+        <mat-error>Cooldown is required.</mat-error>
+      } @else if (formGroup.get('minCooldown')?.hasError('pattern')) {
+        <mat-error>Cooldown must be a positive integer.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Maximum Cooldown</mat-label>
+      <input matInput formControlName="maxCooldown"/>
+      @if (formGroup.get('maxCooldown')?.hasError('required')) {
+        <mat-error>Cooldown is required.</mat-error>
+      } @else if (formGroup.get('maxCooldown')?.hasError('pattern')) {
+        <mat-error>Cooldown must be a positive integer.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Sound File</mat-label>
+      <mat-select formControlName="soundFile">
+        @for (soundFile of soundFileList; track $index) {
+          <mat-option [value]="soundFile.id">{{soundFile.name}}</mat-option>
+        }
+      </mat-select>
+      @if (formGroup.get('rarity')?.hasError('required')) {
+        <mat-error>Rarity is required.</mat-error>
+      }
+    </mat-form-field>
+
     <div class="button-container">
-      <button mat-button [disabled]="!(formValid())" type="button" (click)="addCaseTemplate()">Add Case Template</button>
+      <button mat-button [disabled]="!(formValid())" type="button" (click)="addSoundTemplate()">Add Sound Template</button>
     </div>
   </form>
 </div>

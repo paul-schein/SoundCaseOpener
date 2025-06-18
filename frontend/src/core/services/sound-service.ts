@@ -11,7 +11,7 @@ import {lastValueFrom} from 'rxjs';
 export class SoundService extends ServiceBase {
 
   protected override get controller(): string {
-    return 'case-templates';
+    return 'sound-templates';
   }
 
   public async addSoundTemplate(newSoundTemplate: NewSoundTemplate): Promise<SoundTemplate | undefined> {
