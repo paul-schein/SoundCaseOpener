@@ -1,0 +1,41 @@
+<div class="form-column">
+  <form [formGroup]="formGroup">
+    <mat-form-field>
+      <mat-label>Case Template</mat-label>
+      <mat-select formControlName="caseTemplate">
+        @for (caseTemplate of caseTemplateList(); track $index) {
+          <mat-option [value]="caseTemplate.id">{{caseTemplate.name}}</mat-option>
+        }
+      </mat-select>
+      @if (formGroup.get('caseTemplate')?.hasError('required')) {
+        <mat-error>Case Template is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Sound Templates</mat-label>
+      <mat-select formControlName="itemTemplate">
+        @for (soundTemplate of soundTemplateList(); track $index) {
+          <mat-option [value]="soundTemplate.id">{{soundTemplate.name}}</mat-option>
+        }
+      </mat-select>
+      @if (formGroup.get('itemTemplate')?.hasError('required')) {
+        <mat-error>Sound Template is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Weight</mat-label>
+      <input matInput formControlName="weight"/>
+      @if (formGroup.get('weight')?.hasError('required')) {
+        <mat-error>Weight is required.</mat-error>
+      } @else if (formGroup.get('weight')?.hasError('pattern')) {
+        <mat-error>Weight must be a positive number.</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="button-container">
+      <button mat-button [disabled]="!(formValid())" type="button" (click)="addToCaseTemplate()">Add to Case Template</button>
+    </div>
+  </form>
+</div>
