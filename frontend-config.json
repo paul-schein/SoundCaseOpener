@@ -1,3 +1,6 @@
 {
-  "backendBaseUrl": "http://localhost:5101"
+  "backendBaseUrl": "http://localhost:5101",
+  "nameMinLength": 4,
+  "descriptionMaxLength": 200,
+  "soundsBaseUrl": "http://localhost:5102"
 }

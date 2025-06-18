@@ -1,0 +1,12 @@
+@keyframes pulse-outline {
+  0% {
+    outline: 4px solid deepskyblue;
+  }
+  100% {
+    outline: 7px solid deepskyblue;
+  }
+}
+
+.pulsing-outline {
+  animation: pulse-outline 0.3s infinite alternate ease-in-out;
+}

@@ -1,0 +1,6 @@
+<button mat-flat-button
+        (click)="handlePlaySound()"
+        class="flex flex-row items-center !p-5 !text-2xl"
+        [disabled]="btnDisabled()">
+  <span>{{currentCooldown()}} Sound Name</span>
+</button>

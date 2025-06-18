@@ -1,0 +1,11 @@
+<mat-card class="pb-5">
+  <mat-card-header class="flex flex-row gap-x-5 justify-between items-center">
+    <div class="flex flex-col gap-y-3">
+      <mat-card-title>{{ lobby().name }}</mat-card-title>
+      <mat-card-subtitle class="text-gray-500 !text-gray-500">
+        {{ lobby().id }}
+      </mat-card-subtitle>
+    </div>
+    <app-lobby-user-count [lobby]="lobby()"></app-lobby-user-count>
+  </mat-card-header>
+</mat-card>

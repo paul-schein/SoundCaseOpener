@@ -1,0 +1,31 @@
+<div class="m-5 flex flex-row">
+  <div class="w-1/2">
+    @let lobbyRaw = lobby();
+    @if (lobbyRaw !== null) {
+      <div class="flex justify-between items-center">
+        <h2 class="text-3xl font-bold">Lobby: {{ lobbyRaw.name }}</h2>
+        <app-lobby-user-count [lobby]="lobbyRaw"></app-lobby-user-count>
+      </div>
+    }
+    <div class="mt-10 flex flex-wrap gap-2">
+      @for (user of users(); track $index) {
+        <div class="bg-white text-black rounded-full px-6 py-2 text-lg shadow font-medium"
+        [ngClass]="{
+          'pulsing-outline': usersWithSound().includes(user),
+        }">
+          {{ user }}
+        </div>
+      }
+    </div>
+    <button class="fixed bottom-4 left-4 bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-700 transition"
+            (click)="handleLeaveLobby()">
+      Leave
+    </button>
+  </div>
+
+  <div class="mx-7 w-px h-screen bg-gray-300"></div>
+
+  <div class="w-1/2">
+    <app-sound-player></app-sound-player>
+  </div>
+</div>

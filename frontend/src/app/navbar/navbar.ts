@@ -20,14 +20,14 @@ export class Navbar {
   private readonly router: Router = inject(Router);
 
   constructor() {
-    this.isAdmin = this.service.currentUser?.role === 'Admin';
+    this.isAdmin = this.service.currentUser()?.role === 'Admin';
   }
 
   protected readonly Home = Home;
 
-  protected logout(): void {
+  protected async logout(): Promise<void> {
     this.service.logout();
-    window.location.reload();
+    await this.router.navigate(['/login']);
   }
 }
 
