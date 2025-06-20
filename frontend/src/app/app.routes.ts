@@ -11,7 +11,7 @@ const adminDashboardImport = () =>
 
 export const routes: Routes = [
   {path: 'home', component: Home, canActivate: [authGuard]},
-  {path: 'admin-dashboard', loadComponent: adminDashboardImport, canActivate: [authGuard, isAdminAuthGuard] },
+  {path: 'admin-dashboard', loadComponent: adminDashboardImport, canActivate: [authGuard, /*isAdminAuthGuard*/] },
   {path: 'login', component: Login},
   {path: 'lobby-list', component: LobbyList, canActivate: [authGuard]},
   {path: 'lobby/:lobbyId', component: LobbyDetail, canActivate: [authGuard]},

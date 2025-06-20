@@ -1,0 +1,17 @@
+<form [formGroup]="formGroup">
+  <mat-form-field>
+    <mat-label>Sound Templates</mat-label>
+    <mat-select formControlName="itemTemplate">
+      @for (soundTemplate of soundTemplateList(); track $index) {
+        <mat-option [value]="soundTemplate.id">{{soundTemplate.name}}</mat-option>
+      }
+    </mat-select>
+    @if (formGroup.get('itemTemplate')?.hasError('required')) {
+      <mat-error>Sound Template is required.</mat-error>
+    }
+  </mat-form-field>
+  <div class="button-container">
+    <button mat-button [disabled]="!(formValid())" type="button" (click)="deleteTemplate()">Delete Sound Template</button>
+  </div>
+</form>
+

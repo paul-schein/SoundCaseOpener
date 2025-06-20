@@ -42,6 +42,18 @@ export class SoundTemplateService extends ServiceBase {
       return undefined;
     }
   }
+
+  public async deleteSoundTemplate(id: number): Promise<boolean | undefined> {
+    const url = this.buildUrl(`${id}`);
+
+    try {
+      const response = await firstValueFrom(this.http.delete<any>(url));
+      return true;
+    } catch (error: any) {
+      console.error(`Error adding sound template: ${JSON.stringify(error)}`);
+      return undefined;
+    }
+  }
 }
 
 const newSoundTemplateSchema = z.object({
