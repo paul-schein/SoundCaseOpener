@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal, Signal, WritableSignal} from '@angular/core';
+import {Component, computed, inject, input, InputSignal, OnInit, signal, Signal, WritableSignal} from '@angular/core';
 import {MatError, MatFormField, MatInput, MatLabel} from '@angular/material/input';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
@@ -25,11 +25,11 @@ import { CaseTemplate, CaseTemplateService, NewItemTemplateToCaseTemplate} from 
   styleUrl: './case-template-editor.scss'
 })
 export class CaseTemplateEditor implements OnInit {
-  protected snackbarService: SnackbarService = inject(SnackbarService);
-  protected caseTemplateService: CaseTemplateService = inject(CaseTemplateService);
-  protected soundTemplateService: SoundTemplateService = inject(SoundTemplateService);
-  protected caseTemplateList: WritableSignal<CaseTemplate[]> = signal([]);
-  protected soundTemplateList: WritableSignal<SoundTemplateResponse[]> = signal([]);
+  public snackbarService: InputSignal<SnackbarService> = input.required();
+  public caseTemplateService: InputSignal<CaseTemplateService> = input.required();
+  public soundTemplateService: InputSignal<SoundTemplateService> = input.required();
+  public caseTemplateList: InputSignal<CaseTemplate[]> = input.required();
+  public soundTemplateList: InputSignal<SoundTemplateResponse[]> = input.required();
   private readonly formBuilder: FormBuilder = inject(FormBuilder);
   protected readonly formGroup = this.formBuilder.group({
     caseTemplate: [0, [Validators.required]],
@@ -44,20 +44,11 @@ export class CaseTemplateEditor implements OnInit {
   });
 
   public async ngOnInit() {
-    const soundTemplatesResult = await this.soundTemplateService.getAllSoundTemplates();
-    if (soundTemplatesResult) {
-      this.soundTemplateList.set(soundTemplatesResult.soundTemplates);
-    }
-
-    const caseTemplatesResult = await this.caseTemplateService.getAllCaseTemplates();
-    if (caseTemplatesResult) {
-      this.caseTemplateList.set(caseTemplatesResult.caseTemplates);
-    }
   }
 
   public async addToCaseTemplate() {
     if (!this.formGroup.valid) {
-      this.snackbarService.show("Please fill all required fields correctly");
+      this.snackbarService().show("Please fill all required fields correctly");
       return;
     }
 
@@ -70,13 +61,13 @@ export class CaseTemplateEditor implements OnInit {
     };
 
     const result =
-      await this.caseTemplateService.addToCaseTemplate(newItemTemplateToCaseTemplate);
+      await this.caseTemplateService().addToCaseTemplate(newItemTemplateToCaseTemplate);
 
     if (result) {
-      this.snackbarService.show("Sound Template successfully added to Case Template");
+      this.snackbarService().show("Sound Template successfully added to Case Template");
       this.formGroup.reset();
     } else {
-      this.snackbarService.show("There was an error trying to add a Sound Template to a Case Template");
+      this.snackbarService().show("There was an error trying to add a Sound Template to a Case Template");
     }
   }
 }

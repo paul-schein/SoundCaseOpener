@@ -9,7 +9,7 @@ import {SoundTemplateDeletor} from './sound-template-deletor/sound-template-dele
 import {SnackbarService} from '../../core/services/snackbar-service';
 import {CaseTemplate, CaseTemplateService} from '../../core/services/case-template-service';
 import {SoundTemplateResponse, SoundTemplateService} from '../../core/services/sound-template-service';
-import {SoundFileService} from '../../core/services/sound-file-service';
+import {SoundFile, SoundFileService} from '../../core/services/sound-file-service';
 import {ConfigService} from '../../core/services/config-service';
 
 @Component({
@@ -31,12 +31,13 @@ import {ConfigService} from '../../core/services/config-service';
   styleUrl: './admin-dashboard.scss'
 })
 export class AdminDashboard {
-  protected snackbarService: SnackbarService = inject(SnackbarService);
+  protected snackBarService: SnackbarService = inject(SnackbarService);
   protected configService: ConfigService = inject(ConfigService);
   protected caseTemplateService: CaseTemplateService = inject(CaseTemplateService);
   protected soundTemplateService: SoundTemplateService = inject(SoundTemplateService);
+  protected soundFileService: SoundFileService = inject(SoundFileService);
   protected caseTemplateList: WritableSignal<CaseTemplate[]> = signal([]);
   protected soundTemplateList: WritableSignal<SoundTemplateResponse[]> = signal([]);
-  protected soundFileService: SoundFileService = inject(SoundFileService);
-  protected files: WritableSignal<File[]> = signal([]);
+  protected soundFileList: WritableSignal<SoundFile[]> = signal([]);
+  protected fileList: WritableSignal<File[]> = signal([]);
 }

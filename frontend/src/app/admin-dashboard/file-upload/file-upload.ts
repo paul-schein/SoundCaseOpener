@@ -1,4 +1,4 @@
-import {Component, inject, signal, WritableSignal} from '@angular/core';
+import {Component, inject, input, InputSignal, signal, WritableSignal} from '@angular/core';
 import {MatButton} from '@angular/material/button';
 import {SoundFileService} from '../../../core/services/sound-file-service';
 import {SnackbarService} from '../../../core/services/snackbar-service';
@@ -12,9 +12,9 @@ import {SnackbarService} from '../../../core/services/snackbar-service';
   styleUrl: './file-upload.scss'
 })
 export class FileUpload {
-  protected soundFileService: SoundFileService = inject(SoundFileService);
-  protected snackBarService: SnackbarService = inject(SnackbarService);
-  protected files: WritableSignal<File[]> = signal([]);
+  public soundFileService: InputSignal<SoundFileService> = input.required();
+  public snackBarService: InputSignal<SnackbarService> = input.required();
+  protected fileList: WritableSignal<File[]> = signal([]);
   protected isDragOver: WritableSignal<boolean> = signal(false);
 
   public onDragOver(event: DragEvent) {
@@ -43,17 +43,17 @@ export class FileUpload {
   }
 
   public clearFiles(): void {
-    this.files.set([]);
+    this.fileList.set([]);
   }
 
   public async pushFiles() {
-    await this.soundFileService.uploadFiles(this.files());
+    await this.soundFileService().uploadFiles(this.fileList());
     this.clearFiles();
-    this.snackBarService.show("Files successfully uploaded!")
+    this.snackBarService().show("Files successfully uploaded!")
   }
 
   private addFiles(fileList: FileList) {
-    this.files.update(files => {
+    this.fileList.update(files => {
       const newFiles = [...files];
       for (let i = 0; i < fileList.length; i++) {
         newFiles.push(fileList.item(i)!);

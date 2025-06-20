@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, Signal} from '@angular/core';
+import {Component, computed, inject, input, InputSignal, OnInit, Signal} from '@angular/core';
 import {MatError, MatFormField, MatInput, MatLabel} from '@angular/material/input';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
@@ -27,15 +27,15 @@ import {CaseTemplateService, NewCaseTemplate} from '../../../core/services/case-
   styleUrl: './case-template-creator.scss'
 })
 export class CaseTemplateCreator implements OnInit {
-  protected configService: ConfigService = inject(ConfigService);
-  protected snackbarService: SnackbarService = inject(SnackbarService);
-  protected caseTemplateService: CaseTemplateService = inject(CaseTemplateService);
+  public configService: InputSignal<ConfigService> = input.required();
+  public snackbarService: InputSignal<SnackbarService> = input.required();
+  public caseTemplateService: InputSignal<CaseTemplateService> = input.required();
   protected readonly RaritySchema = RaritySchema;
   protected rarityOptions: {name: string, value: string}[] = [];
   private readonly formBuilder: FormBuilder = inject(FormBuilder);
   protected readonly formGroup = this.formBuilder.group({
-    name: ['', [Validators.required, Validators.minLength(this.configService.config.nameMinLength)]],
-    description: ['', [Validators.required, Validators.maxLength(this.configService.config.descriptionMaxLength)]],
+    name: ['', [Validators.required, Validators.minLength(this.configService().config.nameMinLength)]],
+    description: ['', [Validators.required, Validators.maxLength(this.configService().config.descriptionMaxLength)]],
     rarity: ['', [Validators.required]],
   });
 
@@ -54,7 +54,7 @@ export class CaseTemplateCreator implements OnInit {
 
   public async addCaseTemplate() {
     if (!this.formGroup.valid) {
-      this.snackbarService.show("Please fill all required fields correctly");
+      this.snackbarService().show("Please fill all required fields correctly");
       return;
     }
 
@@ -66,12 +66,12 @@ export class CaseTemplateCreator implements OnInit {
       rarity: formValues.rarity as unknown as Rarity
     };
 
-    const result = await this.caseTemplateService.addCaseTemplate(newCaseTemplate);
+    const result = await this.caseTemplateService().addCaseTemplate(newCaseTemplate);
 
     if (result) {
-      this.snackbarService.show("Case Template successfully added");
+      this.snackbarService().show("Case Template successfully added");
       this.formGroup.reset();
     } else {
-      this.snackbarService.show("There was an error trying to add a Case Template");
+      this.snackbarService().show("There was an error trying to add a Case Template");
     }  }
 }

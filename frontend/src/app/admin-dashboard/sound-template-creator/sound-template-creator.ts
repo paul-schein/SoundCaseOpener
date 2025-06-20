@@ -1,4 +1,15 @@
-import {Component, computed, inject, OnInit, signal, Signal, WritableSignal} from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  input,
+  Input,
+  InputSignal,
+  OnInit,
+  signal,
+  Signal,
+  WritableSignal
+} from '@angular/core';
 import {MatError, MatFormField, MatInput, MatLabel} from '@angular/material/input';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
@@ -28,16 +39,16 @@ import {SoundFile, SoundFileService} from '../../../core/services/sound-file-ser
   styleUrl: './sound-template-creator.scss'
 })
 export class SoundTemplateCreator implements OnInit {
-  protected configService: ConfigService = inject(ConfigService);
-  protected snackbarService: SnackbarService = inject(SnackbarService);
-  protected soundService: SoundTemplateService = inject(SoundTemplateService);
-  protected soundFileService: SoundFileService = inject(SoundFileService);
-  protected soundFileList: WritableSignal<SoundFile[]> = signal([]);
+  public configService: InputSignal<ConfigService> = input.required();
+  public snackbarService: InputSignal<SnackbarService> = input.required();
+  public soundTemplateService: InputSignal<SoundTemplateService> = input.required();
+  public soundFileService: InputSignal<SoundFileService> = input.required();
+  public soundFileList: InputSignal<SoundFile[]> = input.required();
   protected rarityOptions: {name: string, value: string}[] = [];
   private readonly formBuilder: FormBuilder = inject(FormBuilder);
   protected readonly formGroup = this.formBuilder.group({
-    name: ['', [Validators.required, Validators.minLength(this.configService.config.nameMinLength)]],
-    description: ['', [Validators.required, Validators.maxLength(this.configService.config.descriptionMaxLength)]],
+    name: ['', [Validators.required, Validators.minLength(this.configService().config.nameMinLength)]],
+    description: ['', [Validators.required, Validators.maxLength(this.configService().config.descriptionMaxLength)]],
     rarity: ['', [Validators.required]],
     minCooldown: [0, [Validators.required, Validators.pattern(/^[0-9]+(\.[0-9]+)?$/)]],
     maxCooldown: [0, [Validators.required, Validators.pattern(/^[0-9]+(\.[0-9]+)?$/)]],
@@ -69,21 +80,17 @@ export class SoundTemplateCreator implements OnInit {
       name: value,
       value: value
     }));
-    const result = await this.soundFileService.getAllFiles();
-    if (result) {
-      this.soundFileList.set(result.soundFiles);
-    }
   }
 
   public async addSoundTemplate() {
     if (!this.formGroup.valid) {
-      this.snackbarService.show("Please fill all required fields correctly");
+      this.snackbarService().show("Please fill all required fields correctly");
       return;
     }
 
     const formValues = this.formGroup.value;
     if (!this.isCooldownValid()) {
-      this.snackbarService.show("Maximum cooldown can't be smaller than the minimum cooldown");
+      this.snackbarService().show("Maximum cooldown can't be smaller than the minimum cooldown");
       return;
     }
 
@@ -96,13 +103,13 @@ export class SoundTemplateCreator implements OnInit {
       soundFileId: formValues.soundFile as number
     };
 
-    const result = await this.soundService.addSoundTemplate(newSoundTemplate);
+    const result = await this.soundTemplateService().addSoundTemplate(newSoundTemplate);
 
     if (result) {
-      this.snackbarService.show("Sound Template successfully added");
+      this.snackbarService().show("Sound Template successfully added");
       this.formGroup.reset();
     } else {
-      this.snackbarService.show("There was an error trying to add a Sound Template");
+      this.snackbarService().show("There was an error trying to add a Sound Template");
     }
   }
 }

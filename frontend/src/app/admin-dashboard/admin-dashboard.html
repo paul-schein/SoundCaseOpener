@@ -6,7 +6,10 @@
           <mat-card-title></mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <app-file-upload></app-file-upload>
+          <app-file-upload
+            [snackBarService]="snackBarService"
+            [soundFileService]="soundFileService"
+          ></app-file-upload>
         </mat-card-content>
       </mat-card>
     </mat-tab>
@@ -18,7 +21,13 @@
             <mat-card-title>Add Sound Templates to Case Templates</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <app-case-template-editor></app-case-template-editor>
+            <app-case-template-editor
+              [snackbarService]="snackBarService"
+              [caseTemplateService]="caseTemplateService"
+              [soundTemplateService]="soundTemplateService"
+              [caseTemplateList]="caseTemplateList()"
+              [soundTemplateList]="soundTemplateList()"
+            ></app-case-template-editor>
           </mat-card-content>
         </mat-card>
 
@@ -27,7 +36,13 @@
             <mat-card-title>Create Sound Templates</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <app-sound-template-creator></app-sound-template-creator>
+            <app-sound-template-creator
+              [configService]="configService"
+              [snackbarService]="snackBarService"
+              [soundFileService]="soundFileService"
+              [soundTemplateService]="soundTemplateService"
+              [soundFileList]="soundFileList()"
+            ></app-sound-template-creator>
           </mat-card-content>
         </mat-card>
 
@@ -36,11 +51,18 @@
             <mat-card-title>Create Case Templates</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <app-case-template-creator></app-case-template-creator>
+            <app-case-template-creator
+              [configService]="configService"
+              [snackbarService]="snackBarService"
+              [caseTemplateService]="caseTemplateService"
+            ></app-case-template-creator>
           </mat-card-content>
         </mat-card>
       </div>
-      <app-sound-template-deletor></app-sound-template-deletor>
+      <app-sound-template-deletor
+        [snackbarService]="snackBarService"
+        [soundTemplateService]="soundTemplateService"
+      ></app-sound-template-deletor>
     </mat-tab>
   </mat-tab-group>
 </div>
