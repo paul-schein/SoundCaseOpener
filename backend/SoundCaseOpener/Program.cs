@@ -4,6 +4,7 @@ using SoundCaseOpener;
 using SoundCaseOpener.Shared;
 using SoundCaseOpener.Util;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebSockets;
 using Microsoft.Extensions.Options;
 using NodaTime.Serialization.SystemTextJson;
 using SoundCaseOpener.Core.Util;
@@ -31,6 +32,7 @@ var app = builder.Build();
 
 app.UseCors(Setup.CorsPolicyName);
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseWebSockets();
 app.MapControllers();
 app.MapHub<LobbyHub>(ILobbyHub.Route).RequireCors(Setup.CorsPolicyName);
 if (app.Environment.IsDevelopment())

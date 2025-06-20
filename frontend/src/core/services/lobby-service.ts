@@ -14,7 +14,9 @@ export class LobbyService {
   private initialized: boolean = false;
   private initializing: boolean = false;
   private connection: signalR.HubConnection = new signalR.HubConnectionBuilder()
-    .withUrl(`${this.configService.config.backendBaseUrl}/hub/lobby`)
+    .withUrl(`${this.configService.config.backendBaseUrl}/hub/lobby`, {
+      withCredentials: true
+    })
     .build();
 
   private readonly lobbyCreatedSubject = new Subject<Lobby>();
