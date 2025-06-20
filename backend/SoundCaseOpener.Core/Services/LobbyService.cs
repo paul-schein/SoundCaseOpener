@@ -74,11 +74,10 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
 
         using (await _lobbiesLock.WriterLockAsync())
         {
+            TryConnectUser(connectionId, user);
             _lobbies[lobbyId] = lobby;
             _lobbyUsers[lobbyId] = [user.Username];
             _userLobbies[userId] = lobbyId;
-            _connections[user.Username] = connectionId;
-            _connectionUsers[connectionId] = userId;
         }
         
         logger.LogInformation("Lobby {LobbyId} created by user {Username}", lobbyId, user.Username);
@@ -101,7 +100,7 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
         {
             if (_userLobbies.ContainsKey(userId))
             {
-                logger.LogWarning("User {Username} is already in a lobby", user.Username);
+                logger.LogInformation("User {Username} is already in a lobby", user.Username);
                 return new NotFound();
             }
             
@@ -111,11 +110,12 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
                 return new NotFound();
             }
             
+            TryConnectUser(connectionId, user);
             _lobbyUsers[lobbyId].Add(user.Username);
             _userLobbies[userId] = lobbyId;
             _lobbies[lobbyId] = lobby with { UserCount = lobby.UserCount + 1 };
-            _connections[user.Username] = connectionId;
-            _connectionUsers[connectionId] = userId;
+            
+            logger.LogInformation("User {Username} joined lobby {LobbyId}", user.Username, lobbyId);
 
             return new Success<(IReadOnlyCollection<string> connections, string username, string lobbyId)>(
              (GetConnectionIdsOfLobby(lobbyId), user.Username, lobbyId));
@@ -130,7 +130,7 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
         {
             if (!_connectionUsers.TryGetValue(connectionId, out int userId))
             {
-                logger.LogWarning("Connection {ConnectionId} is not associated with any user", connectionId);
+                logger.LogInformation("Connection {ConnectionId} is not associated with any user", connectionId);
                 return new NotFound();
             }
             
@@ -155,8 +155,6 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
             }
 
             _userLobbies.Remove(userId);
-            _connections.Remove(user.Username);
-            _connectionUsers.Remove(connectionId);
             
             bool lobbyDeleted = lobby.UserCount <= 1;
             if (lobbyDeleted)
@@ -172,6 +170,8 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
                 logger.LogInformation("User {Username} left lobby {LobbyId}", user.Username, lobbyId);
             }
 
+            TryDisconnectUser(connectionId, user.Username);
+            
             return new Success<(IReadOnlyCollection<string> connections, string username, 
                 string lobbyId, bool lobbyDeleted)>(
                  (GetConnectionIdsOfLobby(lobbyId), user.Username, lobbyId, lobbyDeleted));
@@ -268,13 +268,41 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
         {
             if (!_lobbies.TryGetValue(lobbyId, out Lobby? lobby))
             {
-                logger.LogWarning("Lobby with id {LobbyId} not found", lobbyId);
+                logger.LogInformation("Lobby with id {LobbyId} not found", lobbyId);
                 return new NotFound();
             }
             return lobby;
         }
     }
 
+    private bool TryDisconnectUser(string connectionId, string username)
+    {
+        if (!_connectionUsers.Remove(connectionId, out int userId))
+        {
+            logger.LogInformation("Connection {ConnectionId} is not associated with any user", connectionId);
+            return false;
+        }
+
+        _connections.Remove(username);
+        logger.LogInformation("Disconnected user {Username} from connection {ConnectionId}",
+                              username, connectionId);
+        return true;
+    }
+
+    private bool TryConnectUser(string connectionId, User user)
+    {
+        if (!_connections.TryAdd(user.Username, connectionId))
+        {
+            logger.LogInformation("User {Username} is already connected", user.Username);
+            return false;
+        }
+
+        _connectionUsers[connectionId] = user.Id;
+        logger.LogInformation("Connected user {Username} to connection {ConnectionId}", 
+                              user.Username, connectionId);
+        return true;
+    }
+    
     private async ValueTask<ILobbyService.UserCases> CreateCasesForUsers(CaseTemplate template,
                                                                          IReadOnlyCollection<User> users, 
                                                                          IUnitOfWork uow)
@@ -297,7 +325,7 @@ public class LobbyService(IServiceScopeFactory scopeFactory,
     {
         if (!_lobbyUsers.TryGetValue(lobbyId, out HashSet<string>? users))
         {
-            logger.LogWarning("Lobby with id {LobbyId} not found", lobbyId);
+            logger.LogInformation("Lobby with id {LobbyId} not found", lobbyId);
             return [];
         }
         return users.Select(u => _connections[u]).ToList();
