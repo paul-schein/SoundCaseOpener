@@ -19,6 +19,7 @@ export class LoginService {
     try {
       let res = await firstValueFrom(this.http.get(url, {observe: 'response'}));
 
+      console.log(res);
       const user: User = userZod.parse(res.body);
       this.setCurrentUser(user);
       return user;

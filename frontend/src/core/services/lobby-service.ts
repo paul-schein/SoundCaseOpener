@@ -2,6 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {ConfigService} from './config-service';
 import {LoginService} from './login-service';
 import * as signalR from '@microsoft/signalr';
+import {HttpTransportType} from '@microsoft/signalr';
 import {z} from 'zod';
 import {Subject} from 'rxjs';
 
@@ -14,8 +15,9 @@ export class LobbyService {
   private initialized: boolean = false;
   private initializing: boolean = false;
   private connection: signalR.HubConnection = new signalR.HubConnectionBuilder()
-    .withUrl(`${this.configService.config.backendBaseUrl}/hub/lobby`, {
-      withCredentials: true
+    .withUrl(`${this.configService.config.backendHubUrl}/hub/lobby`, {
+      skipNegotiation: true,
+      transport: HttpTransportType.WebSockets
     })
     .build();
 

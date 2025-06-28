@@ -1,5 +1,6 @@
 ﻿{
   "backendBaseUrl": "http://localhost:5200",
+  "backendHubUrl": "ws://localhost:5200/hub",
   "nameMinLength": 4,
   "descriptionMaxLength": 200,
   "soundsBaseUrl": "http://localhost:5102"

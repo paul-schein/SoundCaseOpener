@@ -32,9 +32,8 @@ var app = builder.Build();
 
 app.UseCors(Setup.CorsPolicyName);
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseWebSockets();
 app.MapControllers();
-app.MapHub<LobbyHub>(ILobbyHub.Route).RequireCors(Setup.CorsPolicyName);
+app.MapHub<LobbyHub>(ILobbyHub.Route);
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
